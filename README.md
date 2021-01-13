@@ -15,7 +15,7 @@ The `Bot` base class will construct a command list when a new instance of your b
 
 An example of a simple *Echo* bot is shown below:
 
-```
+```csharp
 public class EchoBot : Bot
 {
     public EchoBot(ClientDetails details) : base(details)
