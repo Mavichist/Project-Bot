@@ -1,8 +1,4 @@
-BotScaffold/bin
-BotScaffold/obj
-ProjectBot/bin
-ProjectBot/obj
-BotTests/bin
-BotTests/obj
+*/bin
+*/obj
 clientdetails.json
 Servers/
