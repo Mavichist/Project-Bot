@@ -17,7 +17,7 @@ namespace BotTests
         public static void Main(string[] args)
         {
             ClientDetails details = ClientDetails.LoadFrom("clientdetails.json");
-            ProjectManagerBot bot = new ProjectManagerBot(details.ID, details.Token, details.Indicator);
+            ProjectManagerBot bot = new ProjectManagerBot(details);
             bot.Run();
         }
     }
