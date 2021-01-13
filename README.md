@@ -29,5 +29,27 @@ public class EchoBot : Bot
         string phrase = match.Groups["phrase"].Value;
         await args.Channel.SendMessageAsync($"Echoing: {phrase}");
     }
+    [CommandAttribute("shutdown")]
+    private async Task BotShutdown(Match match, MessageCreateEventArgs args)
+    {
+        await args.Channel.SendMessageAsync("Shutting down...");
+        Stop();
+    }
 }
 ```
+
+### BotTests
+This project simply supplies an application entry-point, instantiates a bot for testing, then runs it.
+
+The bot test program requires that you have a `clientdetails.json` file in your working directory. A template is supplied with this repo that you can fill out. You need to fill in your bot's client ID and token so that it can connect to the Discord API and interact with servers.
+
+You will also need to invite the bot user to your server using the following link (replacing the placeholder values with the information relevant to your bot):
+
+`https://discord.com/oauth2/authorize?client_id=CLIENT_ID_HERE&scope=bot&permissions=BOT_PERMISSION_NUMBER_HERE`
+
+You can generate a permission number using the Discord development tools site (the same one used to create the bot user in the first place). These permissions control what the bot is allowed to do on your server. The API will throw exceptions if the bot does not have adequate permissions to do what it tries to.
+
+To run the test, use the following command: `dotnet run -p BotTests`
+
+### ProjectBot
+This project contains a bot that handles the creation of projects, managing their associated channels, roles and permissions. It also contains the data structures and Json code necessary to save and load project lists for different servers.
