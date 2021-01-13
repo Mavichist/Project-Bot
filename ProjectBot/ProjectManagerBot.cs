@@ -49,10 +49,10 @@ namespace ProjectBot
         /// <param name="match">The regex match for command parameters.</param>
         /// <param name="args">The context for the message that invoked the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("die")]
-        private async Task Die(Match match, MessageCreateEventArgs args)
+        [CommandAttribute("shutdown")]
+        private async Task Shutdown(Match match, MessageCreateEventArgs args)
         {
-            await args.Channel.SendMessageAsync("Goodbye daddy.");
+            await args.Channel.SendMessageAsync("Shutting down...");
             Stop();
         }
         /// <summary>
