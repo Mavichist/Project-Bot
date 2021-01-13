@@ -43,17 +43,30 @@ namespace ProjectBot
 
         }
 
+        /// <summary>
+        /// A simple parameterless command for shutting down the bot.
+        /// </summary>
+        /// <param name="match">The regex match for command parameters.</param>
+        /// <param name="args">The context for the message that invoked the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("die")]
         private async Task Die(Match match, MessageCreateEventArgs args)
         {
             await args.Channel.SendMessageAsync("Goodbye daddy.");
             Stop();
         }
+        /// <summary>
+        /// Defines the functionality for adding a project to this server's list.
+        /// </summary>
+        /// <param name="match">The regex match for command parameters.</param>
+        /// <param name="args">The context for the message that invoked the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project add", ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
         private async Task AddProject(Match match, MessageCreateEventArgs args)
         {
             string name = match.Groups["name"].Value;
-            await args.Channel.SendMessageAsync($"Adding {name} to project list...");
+
+            await args.Channel.SendMessageAsync($"Adding \"{name}\" to project list...");
 
             ProjectServer server;
             DiscordChannel category = null;
@@ -81,7 +94,6 @@ namespace ProjectBot
 
             if (!server.Projects.ContainsKey(name))
             {
-                await args.Guild.GetChannelsAsync();
                 var curatorRole = await args.Guild.CreateRoleAsync($"{name} Curator");
                 var memberRole = await args.Guild.CreateRoleAsync($"{name} Member");
                 var channel = await args.Guild.CreateChannelAsync($"{name} Chat", ChannelType.Text, category);
@@ -91,15 +103,23 @@ namespace ProjectBot
                 await channel.AddOverwriteAsync(memberRole, Permissions.AccessChannels);
 
                 server.Projects.Add(name, new Project(name, channel.Id, curatorRole.Id, memberRole.Id));
+
                 await args.Channel.SendMessageAsync($"Added \"{name}\" to this server.");
             }
             else await args.Channel.SendMessageAsync($"A project named \"{name}\" already exists on this server.");
         }
+        /// <summary>
+        /// Defines functionality for removing a project from this server's list.
+        /// </summary>
+        /// <param name="match">The regex match for command parameters.</param>
+        /// <param name="args">The context for the message that invoked the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project remove", ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
         private async Task RemoveProject(Match match, MessageCreateEventArgs args)
         {
             string name = match.Groups["name"].Value;
-            await args.Channel.SendMessageAsync($"Removing {name} from project list...");
+
+            await args.Channel.SendMessageAsync($"Removing \"{name}\" from project list...");
 
             if (ProjectServers.TryGetValue(args.Guild.Id, out ProjectServer server))
             {
@@ -116,22 +136,27 @@ namespace ProjectBot
                     server.Projects.Remove(name);
                     await args.Channel.SendMessageAsync($"Removed \"{name}\" from this server.");
                 }
-                else await args.Channel.SendMessageAsync($"No project titled {name} exists on this server.");
+                else await args.Channel.SendMessageAsync($"No project titled \"{name}\" exists on this server.");
             }
             else await args.Channel.SendMessageAsync("No projects exist for this server.");
         }
+        /// <summary>
+        /// Defines a command for listing existing projects on this server.
+        /// </summary>
+        /// <param name="match">The regex match for command parameters.</param>
+        /// <param name="args">The context for the message that invoked the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project list")]
         private async Task ListProjects(Match match, MessageCreateEventArgs args)
         {
             if (ProjectServers.TryGetValue(args.Guild.Id, out ProjectServer server))
             {
                 StringBuilder list = new StringBuilder();
-                list.Append("```\n");
+                list.Append("Projects:");
                 foreach (var project in server.Projects.Values)
                 {
-                    list.Append($"{project.Name}\n");
+                    list.Append($"\n`{project.Name}`");
                 }
-                list.Append("```");
                 await args.Channel.SendMessageAsync(list.ToString());
             }
             else await args.Channel.SendMessageAsync("No projects exist for this server.");
