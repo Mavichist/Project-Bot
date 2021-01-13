@@ -47,7 +47,7 @@ namespace BotScaffold
         /// <summary>
         /// The client object through which the bot communicates with the Discord API.
         /// </summary>
-        private DiscordClient Client
+        protected DiscordClient Client
         {
             get;
             set;
@@ -113,6 +113,29 @@ namespace BotScaffold
         }
         
         /// <summary>
+        /// Occurs when the bot is first run.
+        /// </summary>
+        protected virtual void OnStartup()
+        {
+            Console.WriteLine("Starting up...");
+        }
+        /// <summary>
+        /// Occurs when the bot is shut down and the main worker thread ceases.
+        /// </summary>
+        protected virtual void OnShutdown()
+        {
+            Console.WriteLine("Shutting down...");
+        }
+        /// <summary>
+        /// Occurs when the bot connects using a discord client.
+        /// </summary>
+        /// <param name="client">The client representing the Discord API connection.</param>
+        protected virtual void OnConnected(DiscordClient client)
+        {
+            Console.WriteLine("Connected.");
+        }
+
+        /// <summary>
         /// Connects and runs the bot.
         /// Hangs until the bot is shut down.
         /// </summary>    
@@ -132,8 +155,12 @@ namespace BotScaffold
 
                 Client.MessageCreated += OnMessageCreated;
 
+                OnConnected(Client);
+
                 CancellationSource = new CancellationTokenSource();
                 Task.Delay(-1, CancellationSource.Token).GetAwaiter().GetResult();
+
+                Client.DisconnectAsync().GetAwaiter().GetResult();
             }
             catch (TaskCanceledException tce)
             {
@@ -151,20 +178,6 @@ namespace BotScaffold
         public void Stop()
         {
             CancellationSource.Cancel();
-        }
-        /// <summary>
-        /// Occurs when the bot is first run.
-        /// </summary>
-        public virtual void OnStartup()
-        {
-            Console.WriteLine("Starting up...");
-        }
-        /// <summary>
-        /// Occurs when the bot is shut down and the main worker thread ceases.
-        /// </summary>
-        public virtual void OnShutdown()
-        {
-            Console.WriteLine("Shutting down...");
         }
     }
 }
