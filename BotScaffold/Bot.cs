@@ -136,10 +136,45 @@ namespace BotScaffold
         }
 
         /// <summary>
-        /// Connects and runs the bot.
-        /// Hangs until the bot is shut down.
-        /// </summary>    
-        public void Run()
+        /// Attaches this bot to the client of an existing bot.
+        /// Both bots will subsequently use the same client for their operations.
+        /// Multiple bots cannot operate with the same client ID and token at the same time, so this
+        /// enables multiple bots to run at the same time through the same user.
+        /// </summary>
+        /// <param name="other">The bot whose client to attach this bot to.</param>
+        /// <returns>A task that can be stopped using the Stop() method.</returns>
+        public async Task AttachToAsync(Bot other)
+        {
+            try
+            {
+                OnStartup();
+                
+                Client = other.Client;
+
+                Client.MessageCreated += OnMessageCreated;
+
+                OnConnected(Client);
+
+                CancellationSource = new CancellationTokenSource();
+                await Task.Delay(-1, CancellationSource.Token);
+
+                Client.MessageCreated -= OnMessageCreated;
+            }
+            catch (TaskCanceledException tce)
+            {
+                OnShutdown();
+            }
+            finally
+            {
+                Client = null;
+                CancellationSource = null;
+            }
+        }
+        /// <summary>
+        /// Runs the bot as a new task that terminates when the bot is shut down.
+        /// </summary>
+        /// <returns>A task that can be stopped using the Stop() method.</returns>
+        public async Task RunAsync()
         {
             try
             {
@@ -151,16 +186,16 @@ namespace BotScaffold
                     TokenType = TokenType.Bot
                 });
 
-                Client.ConnectAsync().GetAwaiter().GetResult();
+                await Client.ConnectAsync();
 
                 Client.MessageCreated += OnMessageCreated;
 
                 OnConnected(Client);
 
                 CancellationSource = new CancellationTokenSource();
-                Task.Delay(-1, CancellationSource.Token).GetAwaiter().GetResult();
+                await Task.Delay(-1, CancellationSource.Token);
 
-                Client.DisconnectAsync().GetAwaiter().GetResult();
+                await Client.DisconnectAsync();
             }
             catch (TaskCanceledException tce)
             {

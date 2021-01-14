@@ -1,4 +1,5 @@
-﻿using BotScaffold;
+﻿using System.Threading.Tasks;
+using BotScaffold;
 using ProjectBot;
 
 namespace BotTests
@@ -17,8 +18,15 @@ namespace BotTests
         public static void Main(string[] args)
         {
             ClientDetails details = ClientDetails.LoadFrom("clientdetails.json");
+            
             ProjectManagerBot bot = new ProjectManagerBot(details);
-            bot.Run();
+            Task b1 = bot.RunAsync();
+
+            ProjectManagerBot bot2 = new ProjectManagerBot(details);
+            Task b2 = bot2.AttachToAsync(bot);
+
+            Task.WaitAll(b1, b2);
+            System.Console.WriteLine("Finished.");
         }
     }
 }
