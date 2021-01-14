@@ -1,7 +1,11 @@
 # Project Bot
+
 ## About
+
 The project bot and its related scaffolding are designed to handle the creation, deletion and access of private channels for those participating in ComSSA projects. It is not necessarily specific to ComSSA, and has many other applications.
+
 ## Components
+
 ### BotScaffold
 The bot scaffold project defines a base class for bots, as well as a system for implementing commands.
 
@@ -41,7 +45,16 @@ public class EchoBot : Bot
 ### BotTests
 This project simply supplies an application entry-point, instantiates a bot for testing, then runs it.
 
-The bot test program requires that you have a `clientdetails.json` file in your working directory. A template is supplied with this repo that you can fill out. You need to fill in your bot's client ID and token so that it can connect to the Discord API and interact with servers.
+### ProjectBot
+This project contains a bot that handles the creation of projects, managing their associated channels, roles and permissions. It also contains the data structures and Json code necessary to save and load project lists for different servers.
+
+## Walkthrough
+
+In order to work with this repo you will need a Discord bot application to work with. You can create one using the following link:
+
+`https://discord.com/developers/applications`
+
+Once you've created a new application, click on the `Bot` tab and add a bot to the application.
 
 You will also need to invite the bot user to your server using the following link (replacing the placeholder values with the information relevant to your bot):
 
@@ -49,7 +62,10 @@ You will also need to invite the bot user to your server using the following lin
 
 You can generate a permission number using the Discord development tools site (the same one used to create the bot user in the first place). These permissions control what the bot is allowed to do on your server. The API will throw exceptions if the bot does not have adequate permissions to do what it tries to.
 
-To run the test, use the following command: `dotnet run -p BotTests`
+The bot test program requires that you have a `clientdetails.json` file in your working directory. A template is supplied with this repo that you can fill out. You need to fill in your bot client ID and token so that it can connect to the Discord API and interact with servers.
 
-### ProjectBot
-This project contains a bot that handles the creation of projects, managing their associated channels, roles and permissions. It also contains the data structures and Json code necessary to save and load project lists for different servers.
+Once the bot is invited, and the client details have been filled in, you can start the bot test project by using the following command:
+
+`dotnet run -p BotTests`
+
+If all went according to plan, your bot should now appear to be online and should respond to commands.
