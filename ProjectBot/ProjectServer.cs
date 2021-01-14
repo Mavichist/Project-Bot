@@ -49,37 +49,36 @@ namespace ProjectBot
             ServerID = serverID;
             ProjectCategoryID = projectCategoryID;
         }
-    
-        //WIP
-        public void Save()
-        {
-            if (!Directory.Exists("Servers/"))
-            {
-                Directory.CreateDirectory("Servers/");
-            }
 
+        /// <summary>
+        /// Saves the project server to the specified path as a Json file.
+        /// </summary>
+        /// <param name="filePath">The location of the saved file.</param>
+        public void Save(string filePath)
+        {
             var options = new JsonSerializerOptions()
             {
                 WriteIndented = true
             };
             string data = JsonSerializer.Serialize(this, options);
-            File.WriteAllText($"Servers/{ServerID}.json", data);
+            File.WriteAllText(filePath, data);
         }
 
-        //WIP
-        public static IEnumerable<ProjectServer> LoadServers()
+        /// <summary>
+        /// Loads a series of servers located in the target folder.
+        /// </summary>
+        /// <param name="directory">The folder to load server files from.</param>
+        /// <returns>An enumerable collection of project server objects.</returns>
+        public static IEnumerable<ProjectServer> LoadServers(string directory)
         {
-            if (Directory.Exists("Servers/"))
+            foreach (string fn in Directory.EnumerateFiles(directory, "*.json"))
             {
-                foreach (string fn in Directory.EnumerateFiles("Servers/"))
+                string data = File.ReadAllText(fn);
+                var options = new JsonSerializerOptions()
                 {
-                    string data = File.ReadAllText(fn);
-                    var options = new JsonSerializerOptions()
-                    {
-                        WriteIndented = true
-                    };
-                    yield return JsonSerializer.Deserialize<ProjectServer>(data, options);
-                }
+                    WriteIndented = true
+                };
+                yield return JsonSerializer.Deserialize<ProjectServer>(data, options);
             }
         }
     }

@@ -22,10 +22,7 @@ namespace BotTests
             ProjectManagerBot bot = new ProjectManagerBot(details);
             Task b1 = bot.RunAsync();
 
-            ProjectManagerBot bot2 = new ProjectManagerBot(details);
-            Task b2 = bot2.AttachToAsync(bot);
-
-            Task.WaitAll(b1, b2);
+            Task.WaitAll(b1);
             System.Console.WriteLine("Finished.");
         }
     }
