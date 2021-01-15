@@ -4,6 +4,8 @@
 
 The project bot and its related scaffolding are designed to handle the creation, deletion and access of private channels for those participating in ComSSA projects. It is not necessarily specific to ComSSA, and has many other applications.
 
+By adding more projects to this solution, additional bots can be created independent of any others. Multiple bots can be grafted together on startup, meaning that you can run more than one set of commands and functionality through a single client if you want to.
+
 ## Components
 
 ### BotScaffold
@@ -13,11 +15,15 @@ The bot scaffold consists of the `Bot` base class, which future bots should inhe
 
 The `Command` and `CommandAttribute` classes are used by the `Bot` class and form the basis of new bot commands. Classes inheriting from `Bot` can automate the registration of commands using the `CommandAttribute` system.
 
-When creating a new bot using the scaffold, create a new class and inherit from `Bot`. To register commands and add functionality to the bot, create either public or private methods that match the `CommandCallback` delegate and tag them with the `CommandAttribute` attribute. You can register the command string, as well as a regular expression for extracting parameters, in the constructor of the attribute.
+When creating a new bot using the scaffold, create a new class and inherit from `Bot`. To register commands and add functionality to the bot, create either public or private methods that match the `CommandCallback` delegate type and tag them with the `CommandAttribute` attribute. You can register the command string, as well as a regular expression for extracting parameters, in the constructor of the attribute.
 
-The `Bot` base class will construct a command list when a new instance of your bot class is created. The command methods will only be called if a valid command is entered by a user (the command is properly formatted and the regular expression matches).
+Commands in this framework consist of a `command string`, followed by `command parameters`. To simplify parsing and regex, parameters must always follow the command string, and the command string must be contiguous.
 
-An example of a simple *Echo* bot is shown below:
+For example; `!start goblin "cheeky"` is a valid command because the command string (`start goblin`) comes before the parameter (`"cheeky"`). An invalid interpretation of the same command would be something like; `!goblin "cheeky" start`, because the command string is broken up by parameters (and is therefore not contiguous).
+
+The `Bot` base class will construct a command list when a new instance of your bot class is created. The command methods will only be called if a valid command is entered by a user (the command is properly formatted and the regular expression matches parameters).
+
+An example of a simple `Echo` bot is shown below:
 
 ```csharp
 public class EchoBot : Bot
@@ -41,6 +47,8 @@ public class EchoBot : Bot
     }
 }
 ```
+
+In the above example, no `CommandLevel` is registered for any of the commands. Command levels are used to identify whether a user should be able to call the command in question. By default, for security, only server owners can use commands unless otherwise specified.
 
 ### BotTests
 This project simply supplies an application entry-point, instantiates a bot for testing, then runs it.
