@@ -77,3 +77,5 @@ Once the bot is invited, and the client details have been filled in, you can sta
 `dotnet run -p BotTests`
 
 If all went according to plan, your bot should now appear to be online and should respond to commands.
+
+Please note that you may need to use `dotnet restore` and/or NuGet to install the `DSharpPlus` library (upon which this repo is based).
