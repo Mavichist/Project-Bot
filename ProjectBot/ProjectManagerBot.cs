@@ -15,7 +15,7 @@ namespace ProjectBot
     /// </summary>
     public class ProjectManagerBot : Bot
     {
-        public static readonly string SAVE_DIRECTORY = "Servers/";
+        public static readonly string SAVE_DIRECTORY = "Project_Servers";
 
         /// <summary>
         /// A dictionary of project servers.
@@ -31,15 +31,6 @@ namespace ProjectBot
         /// <summary>
         /// Creates a new instance of the project bot.
         /// </summary>
-        /// <param name="id">The client ID.</param>
-        /// <param name="token">The client token.</param>
-        public ProjectManagerBot(ulong id, string token, char indicator) : base(id, token, indicator)
-        {
-
-        }
-        /// <summary>
-        /// Creates a new instance of the project bot.
-        /// </summary>
         /// <param name="details">The client details to construct the bot with.</param>
         public ProjectManagerBot(ClientDetails details) : base(details)
         {
@@ -50,130 +41,106 @@ namespace ProjectBot
         /// A simple parameterless command for shutting down the bot.
         /// </summary>
         /// <param name="match">The regex match for command parameters.</param>
-        /// <param name="args">The context for the message that invoked the command.</param>
+        /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("shutdown")]
+        [CommandAttribute("shutdown", CommandLevel = CommandLevel.Admin)]
         private async Task Shutdown(Match match, MessageCreateEventArgs args)
         {
-            // Only server owners can shut down the bot.
-            if (args.Author.Id == args.Guild.Owner.Id)
-            {
-                await args.Channel.SendMessageAsync("Shutting down...");
-                Stop();
-            }
-            else
-            {
-                await args.Channel.SendMessageAsync("Only the server owner can shut me down.");
-            }
+            await args.Channel.SendMessageAsync("Shutting down...");
+            Stop();
         }
         /// <summary>
         /// Defines the functionality for adding a project to this server's list.
         /// </summary>
         /// <param name="match">The regex match for command parameters.</param>
-        /// <param name="args">The context for the message that invoked the command.</param>
+        /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("project add", ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
+        [CommandAttribute("project add", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
         private async Task AddProject(Match match, MessageCreateEventArgs args)
         {
-            // Only server owners can add projects.
-            if (args.Author.Id == args.Guild.Owner.Id)
+            string name = match.Groups["name"].Value;
+            await args.Channel.SendMessageAsync($"Adding \"{name}\" to project list...");
+
+            // Create the server and project category, or retrieve them if they exist already.
+            ProjectServer server;
+            DiscordChannel category;
+            if (!ProjectServers.ContainsKey(args.Guild.Id))
             {
-                string name = match.Groups["name"].Value;
-                await args.Channel.SendMessageAsync($"Adding \"{name}\" to project list...");
-
-                // Create the server and project category, or retrieve them if they exist already.
-                ProjectServer server;
-                DiscordChannel category;
-                if (!ProjectServers.ContainsKey(args.Guild.Id))
-                {
-                    category = await args.Guild.CreateChannelCategoryAsync("Projects");
-                    server = new ProjectServer(args.Guild.Id, category.Id);
-                    ProjectServers.Add(args.Guild.Id, server);
-                }
-                else
-                {
-                    server = ProjectServers[args.Guild.Id];
-                    category = args.Guild.GetChannel(server.ProjectCategoryID);
-                }
-
-                // Create the project roles and channel if they don't exist, then set up permissions.
-                if (!server.Projects.ContainsKey(name))
-                {
-                    var curatorRole = await args.Guild.CreateRoleAsync($"{name} Curator");
-                    var memberRole = await args.Guild.CreateRoleAsync($"{name} Member");
-                    var channel = await args.Guild.CreateChannelAsync($"{name} Chat", ChannelType.Text, category);
-
-                    await channel.AddOverwriteAsync(args.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels);
-                    await channel.AddOverwriteAsync(curatorRole, Permissions.AccessChannels);
-                    await channel.AddOverwriteAsync(memberRole, Permissions.AccessChannels);
-
-                    server.Projects.Add(name, new Project(name, channel.Id, curatorRole.Id, memberRole.Id));
-
-                    await args.Channel.SendMessageAsync($"Added \"{name}\" to this server.");
-                }
-                else
-                {
-                    await args.Channel.SendMessageAsync($"A project named \"{name}\" already exists on this server.");
-                }
+                category = await args.Guild.CreateChannelCategoryAsync("Projects");
+                server = new ProjectServer(args.Guild.Id, category.Id);
+                ProjectServers.Add(args.Guild.Id, server);
             }
             else
             {
-                await args.Channel.SendMessageAsync("Only the server owner can create projects.");
+                server = ProjectServers[args.Guild.Id];
+                category = args.Guild.GetChannel(server.ProjectCategoryID);
+            }
+
+            // Create the project roles and channel if they don't exist, then set up permissions.
+            if (!server.Projects.ContainsKey(name))
+            {
+                var curatorRole = await args.Guild.CreateRoleAsync($"{name} Curator");
+                var memberRole = await args.Guild.CreateRoleAsync($"{name} Member");
+                var channel = await args.Guild.CreateChannelAsync($"{name} Chat", ChannelType.Text, category);
+
+                await channel.AddOverwriteAsync(args.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels);
+                await channel.AddOverwriteAsync(curatorRole, Permissions.AccessChannels);
+                await channel.AddOverwriteAsync(memberRole, Permissions.AccessChannels);
+
+                server.Projects.Add(name, new Project(name, channel.Id, curatorRole.Id, memberRole.Id));
+
+                await args.Channel.SendMessageAsync($"Added \"{name}\" to this server.");
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync($"A project named \"{name}\" already exists on this server.");
             }
         }
         /// <summary>
         /// Defines functionality for removing a project from this server's list.
         /// </summary>
         /// <param name="match">The regex match for command parameters.</param>
-        /// <param name="args">The context for the message that invoked the command.</param>
+        /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("project remove", ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
+        [CommandAttribute("project remove", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
         private async Task RemoveProject(Match match, MessageCreateEventArgs args)
         {
-            // Only server owners can remove projects.
-            if (args.Author.Id == args.Guild.Owner.Id)
+            string name = match.Groups["name"].Value;
+            await args.Channel.SendMessageAsync($"Removing \"{name}\" from project list...");
+
+            // If the project exists, retrieve and delete the associated roles and channels.
+            if (ProjectServers.TryGetValue(args.Guild.Id, out ProjectServer server))
             {
-                string name = match.Groups["name"].Value;
-                await args.Channel.SendMessageAsync($"Removing \"{name}\" from project list...");
-
-                // If the project exists, retrieve and delete the associated roles and channels.
-                if (ProjectServers.TryGetValue(args.Guild.Id, out ProjectServer server))
+                if (server.Projects.TryGetValue(name, out Project project))
                 {
-                    if (server.Projects.TryGetValue(name, out Project project))
-                    {
-                        var curatorRole = args.Guild.GetRole(project.CuratorRoleID);
-                        var memberRole = args.Guild.GetRole(project.MemberRoleID);
-                        var channel = args.Guild.GetChannel(project.ChannelID);
+                    var curatorRole = args.Guild.GetRole(project.CuratorRoleID);
+                    var memberRole = args.Guild.GetRole(project.MemberRoleID);
+                    var channel = args.Guild.GetChannel(project.ChannelID);
 
-                        await curatorRole.DeleteAsync();
-                        await memberRole.DeleteAsync();
-                        await channel.DeleteAsync();
+                    await curatorRole.DeleteAsync();
+                    await memberRole.DeleteAsync();
+                    await channel.DeleteAsync();
 
-                        server.Projects.Remove(name);
-                        await args.Channel.SendMessageAsync($"Removed \"{name}\" from this server.");
-                    }
-                    else
-                    {
-                        await args.Channel.SendMessageAsync($"No project titled \"{name}\" exists on this server.");
-                    }
+                    server.Projects.Remove(name);
+                    await args.Channel.SendMessageAsync($"Removed \"{name}\" from this server.");
                 }
                 else
                 {
-                    await args.Channel.SendMessageAsync("No projects exist for this server.");
+                    await args.Channel.SendMessageAsync($"No project titled \"{name}\" exists on this server.");
                 }
             }
             else
             {
-                await args.Channel.SendMessageAsync("Only the server owner can remove projects.");
+                await args.Channel.SendMessageAsync("No projects exist for this server.");
             }
         }
         /// <summary>
         /// Defines a command for listing existing projects on this server.
         /// </summary>
         /// <param name="match">The regex match for command parameters.</param>
-        /// <param name="args">The context for the message that invoked the command.</param>
+        /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("project list")]
+        [CommandAttribute("project list", CommandLevel = CommandLevel.Unrestricted)]
         private async Task ListProjects(Match match, MessageCreateEventArgs args)
         {
             if (ProjectServers.TryGetValue(args.Guild.Id, out ProjectServer server))

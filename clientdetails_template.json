@@ -1,5 +1,9 @@
 {
     "ID":1234,
     "Token":"abcd",
-    "Indicator":"!"
+    "Indicator":"!",
+    "AdminRoleIDs":[
+        5678,
+        9101112
+    ]
 }

@@ -7,6 +7,7 @@ using DSharpPlus.EventArgs;
 
 namespace BotScaffold
 {
+    public enum CommandLevel { Unrestricted = 0, Admin = 1, Owner = 2 }
     public delegate Task CommandCallback(Match match, MessageCreateEventArgs args);
 
     /// <summary>
@@ -39,6 +40,14 @@ namespace BotScaffold
             get;
             private set;
         }
+        /// <summary>
+        /// Specifies what users can run this command.
+        /// </summary>
+        public CommandLevel CommandLevel
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Creates a new command object by mapping a command string to a callback handler.
@@ -46,11 +55,12 @@ namespace BotScaffold
         /// <param name="commandString">The string that identifies the command.</param>
         /// <param name="parameterRegex">A regular expression for extracting parameter values.</param>
         /// <param name="callback">The callback that handles the command execution.</param>
-        public Command(string commandString, string parameterRegex, CommandCallback callback)
+        public Command(string commandString, string parameterRegex, CommandCallback callback, CommandLevel commandLevel)
         {
             CommandString = commandString;
             ParameterRegex = parameterRegex;
             Callback = callback;
+            CommandLevel = commandLevel;
         }
 
         /// <summary>
@@ -111,11 +121,11 @@ namespace BotScaffold
 
             foreach (MethodInfo m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                CommandAttribute commandAttribute = m.GetCustomAttribute<CommandAttribute>();
-                if (commandAttribute != null)
+                CommandAttribute attr = m.GetCustomAttribute<CommandAttribute>();
+                if (attr != null)
                 {
                     CommandCallback callback = m.CreateDelegate<CommandCallback>(o);
-                    commands.Add(new Command(commandAttribute.CommandString, commandAttribute.ParameterRegex, callback));
+                    commands.Add(new Command(attr.CommandString, attr.ParameterRegex, callback, attr.CommandLevel));
                 }
             }
 

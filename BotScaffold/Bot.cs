@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 
 namespace BotScaffold
@@ -60,28 +61,53 @@ namespace BotScaffold
             get;
             set;
         }
-
         /// <summary>
-        /// Creates a new instance of a Discord bot, with the specified ID, indicator and token.
+        /// A list of IDs for roles with admin permissions.
         /// </summary>
-        /// <param name="id">A 64-bit, unsigned identifying number.</param>
-        /// <param name="token">The Discord connection token string.</param>
-        public Bot(ulong id, string token, char indicator)
+        private List<ulong> AdminRoleIDs
         {
-            ID = id;
-            Token = token;
-            Indicator = indicator;
-            Commands = Command.GetCommands(this);
+            get;
+            set;
         }
+
         /// <summary>
         /// Creates a new instance of a Discord bot, with the specified details.
         /// </summary>
         /// <param name="details">The client details object containing the bot user information.</param>
-        public Bot(ClientDetails details) : this(details.ID, details.Token, details.Indicator)
+        public Bot(ClientDetails details)
         {
-
+            ID = details.ID;
+            Token = details.Token;
+            Indicator = details.Indicator;
+            AdminRoleIDs = new List<ulong>(details.AdminRoleIDs);
+            Commands = Command.GetCommands(this);
         }
 
+        /// <summary>
+        /// Determines whether a user has the authority to run the specified command.
+        /// </summary>
+        /// <param name="guild">The guild the command was used in.</param>
+        /// <param name="userID">The ID of the user attempting a command.</param>
+        /// <returns>The command level the user can access.</returns>
+        private async Task<CommandLevel> Auth(DiscordGuild guild, ulong userID)
+        {
+            DiscordMember member = await guild.GetMemberAsync(userID);
+            if (member.IsOwner)
+            {
+                return CommandLevel.Owner;
+            }
+            else
+            {
+                foreach (var role in member.Roles)
+                {
+                    if (AdminRoleIDs.Contains(role.Id))
+                    {
+                        return CommandLevel.Admin;
+                    }
+                }
+                return CommandLevel.Unrestricted;
+            }
+        }
         /// <summary>
         /// When a message is created on a server the bot is part of, the bot identifies commands
         /// intended for it by using the indicator character. It then goes through each of its known
@@ -94,24 +120,32 @@ namespace BotScaffold
         /// <returns>A task to handle processing of the command.</returns>
         private async Task OnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
         {
-            if (args.Author.Id != ID && args.Message.Content.StartsWith(Indicator))
+            // Check to see if the post starts with our indicator and the author wasn't a bot.
+            if (args.Message.Content.StartsWith(Indicator) && !args.Author.IsBot)
             {
-                bool success = false;
+                // Get the command level so we can filter out commands this user can't access.
+                CommandLevel level = await Auth(args.Guild, args.Author.Id);
+                bool commandFound = false;
                 foreach (Command c in Commands)
                 {
-                    success = await c.AttemptAsync(args);
-                    if (success)
+                    // Only if the command is lower or equal to the user level do we attempt to run it.
+                    if (c.CommandLevel <= level)
                     {
-                        break;
+                        // If the regex matches and the command succeeds, we can skip the rest.
+                        if (await c.AttemptAsync(args))
+                        {
+                            commandFound = true;
+                            break;
+                        }
                     }
                 }
-                if (!success)
+                if (!commandFound)
                 {
-                    await args.Channel.SendMessageAsync("Invalid command.");
+                    await args.Channel.SendMessageAsync("Invalid command/auth.");
                 }
             }
         }
-        
+
         /// <summary>
         /// Occurs when the bot is first run.
         /// </summary>

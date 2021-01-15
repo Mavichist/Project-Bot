@@ -39,5 +39,13 @@ namespace BotScaffold
             get;
             set;
         }
+        /// <summary>
+        /// Dictates who can use the command.
+        /// </summary>
+        public CommandLevel CommandLevel
+        {
+            get;
+            set;
+        }
     }
 }

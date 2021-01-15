@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,27 +11,26 @@ namespace BotScaffold
         public ulong ID
         {
             get;
-            private set;
+            set;
         }
         [JsonInclude]
         public string Token
         {
             get;
-            private set;
+            set;
         }
         [JsonInclude]
         public char Indicator
         {
             get;
-            private set;
+            set;
         }
-
-        public ClientDetails(ulong id, string token, char indicator)
+        [JsonInclude]
+        public List<ulong> AdminRoleIDs
         {
-            ID = id;
-            Token = token;
-            Indicator = indicator;
-        }
+            get;
+            set;
+        } = new List<ulong>();
 
         public static ClientDetails LoadFrom(string fileName)
         {

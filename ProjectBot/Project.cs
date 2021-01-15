@@ -14,7 +14,7 @@ namespace ProjectBot
         public string Name
         {
             get;
-            private set;
+            set;
         }
         /// <summary>
         /// Each project has a dedicated channel, identified by this number.
@@ -23,7 +23,7 @@ namespace ProjectBot
         public ulong ChannelID
         {
             get;
-            private set;
+            set;
         }
         /// <summary>
         /// Each project has a curator role, identified by this number.
@@ -32,7 +32,7 @@ namespace ProjectBot
         public ulong CuratorRoleID
         {
             get;
-            private set;
+            set;
         }
         /// <summary>
         /// Each project has a member role, identified by this number.
@@ -42,7 +42,7 @@ namespace ProjectBot
         public ulong MemberRoleID
         {
             get;
-            private set;
+            set;
         }
 
         /// <summary>

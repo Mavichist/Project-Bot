@@ -17,7 +17,7 @@ namespace ProjectBot
         public ulong ServerID
         {
             get;
-            private set;
+            set;
         }
         /// <summary>
         /// A dictionary of projects identified by their names.
@@ -35,7 +35,7 @@ namespace ProjectBot
         public ulong ProjectCategoryID
         {
             get;
-            private set;
+            set;
         }
 
         /// <summary>
