@@ -165,8 +165,13 @@ namespace ProjectBot
             }
         }
 
+        /// <summary>
+        /// Occurs when the bot starts.
+        /// </summary>
         protected override void OnStartup()
         {
+            // If the save directory exists, we can load all of the servers present in it and add
+            // them to our dictionary of known project servers.
             if (Directory.Exists(SAVE_DIRECTORY))
             {
                 foreach (var serv in ProjectServer.LoadServers(SAVE_DIRECTORY))
@@ -175,13 +180,17 @@ namespace ProjectBot
                 }
             }
         }
+        /// <summary>
+        /// Occurs when the bot is shut down.
+        /// </summary>
         protected override void OnShutdown()
         {
+            // If the save directory exists then we need to create it.
             if (!Directory.Exists(SAVE_DIRECTORY))
             {
                 Directory.CreateDirectory(SAVE_DIRECTORY);
             }
-            
+            // We then save every server to that directory using the server ID as a file name.
             foreach (var serv in ProjectServers.Values)
             {
                 serv.Save($"{SAVE_DIRECTORY}/{serv.ServerID}.json");
