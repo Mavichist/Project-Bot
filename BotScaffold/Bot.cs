@@ -84,12 +84,12 @@ namespace BotScaffold
         }
 
         /// <summary>
-        /// Determines whether a user has the authority to run the specified command.
+        /// Determines the level of commands the user is capable of executing.
         /// </summary>
         /// <param name="guild">The guild the command was used in.</param>
         /// <param name="userID">The ID of the user attempting a command.</param>
         /// <returns>The command level the user can access.</returns>
-        private async Task<CommandLevel> Auth(DiscordGuild guild, ulong userID)
+        private async Task<CommandLevel> GetCommandLevelAsync(DiscordGuild guild, ulong userID)
         {
             DiscordMember member = await guild.GetMemberAsync(userID);
             if (member.IsOwner)
@@ -124,7 +124,7 @@ namespace BotScaffold
             if (args.Message.Content.StartsWith(Indicator) && !args.Author.IsBot)
             {
                 // Get the command level so we can filter out commands this user can't access.
-                CommandLevel level = await Auth(args.Guild, args.Author.Id);
+                CommandLevel level = await GetCommandLevelAsync(args.Guild, args.Author.Id);
                 bool commandFound = false;
                 foreach (Command c in Commands)
                 {
