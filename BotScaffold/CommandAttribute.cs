@@ -11,15 +11,6 @@ namespace BotScaffold
         private readonly string commandString;
         
         /// <summary>
-        /// Creates a new command.
-        /// </summary>
-        /// <param name="command">The primary command string.</param>
-        public CommandAttribute(string commandString)
-        {
-            this.commandString = commandString;
-        }
-        
-        /// <summary>
         /// The primary command string.
         /// </summary>
         public string CommandString
@@ -46,6 +37,15 @@ namespace BotScaffold
         {
             get;
             set;
+        } = CommandLevel.Owner;
+        
+        /// <summary>
+        /// Creates a new command.
+        /// </summary>
+        /// <param name="command">The primary command string.</param>
+        public CommandAttribute(string commandString)
+        {
+            this.commandString = commandString;
         }
     }
 }
