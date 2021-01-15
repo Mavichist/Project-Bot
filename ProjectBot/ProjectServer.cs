@@ -71,13 +71,13 @@ namespace ProjectBot
         /// <returns>An enumerable collection of project server objects.</returns>
         public static IEnumerable<ProjectServer> LoadServers(string directory)
         {
+            var options = new JsonSerializerOptions()
+            {
+                WriteIndented = true
+            };
             foreach (string fn in Directory.EnumerateFiles(directory, "*.json"))
             {
                 string data = File.ReadAllText(fn);
-                var options = new JsonSerializerOptions()
-                {
-                    WriteIndented = true
-                };
                 yield return JsonSerializer.Deserialize<ProjectServer>(data, options);
             }
         }

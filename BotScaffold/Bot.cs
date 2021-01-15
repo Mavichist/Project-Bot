@@ -11,28 +11,17 @@ namespace BotScaffold
     /// <summary>
     /// A single instance of a discord bot, with an ID and a token.
     /// </summary>
-    public abstract class Bot
-    {
-        /// <summary>
-        /// The identifying number for this client on Discord.
-        /// </summary>
-        public ulong ID
+    public abstract class Bot<TConfig> where TConfig : BotConfig
+    { 
+        public string Name
         {
             get;
             private set;
         }
         /// <summary>
-        /// The token for this client on Discord.
+        /// Contains configuration information for this bot.
         /// </summary>
-        public string Token
-        {
-            get;
-            private set;
-        }
-        /// <summary>
-        /// All commands processed by this bot must begin with this character.
-        /// </summary>
-        public char Indicator
+        public TConfig Config
         {
             get;
             private set;
@@ -61,28 +50,21 @@ namespace BotScaffold
             get;
             set;
         }
-        /// <summary>
-        /// A list of IDs for roles with admin permissions.
-        /// </summary>
-        private List<ulong> AdminRoleIDs
-        {
-            get;
-            set;
-        }
-
+        
         /// <summary>
         /// Creates a new instance of a Discord bot, with the specified details.
         /// </summary>
         /// <param name="details">The client details object containing the bot user information.</param>
-        public Bot(ClientDetails details)
+        public Bot(string name)
         {
-            ID = details.ID;
-            Token = details.Token;
-            Indicator = details.Indicator;
-            AdminRoleIDs = new List<ulong>(details.AdminRoleIDs);
+            Name = name;
             Commands = Command.GetCommands(this);
         }
 
+        private void LoadConfig()
+        {
+            Config = BotConfig.Load<TConfig>(Name);
+        }
         /// <summary>
         /// Determines the level of commands the user is capable of executing.
         /// </summary>
@@ -100,7 +82,7 @@ namespace BotScaffold
             {
                 foreach (var role in member.Roles)
                 {
-                    if (AdminRoleIDs.Contains(role.Id))
+                    if (Config.AdminRoleIDs.Contains(role.Id))
                     {
                         return CommandLevel.Admin;
                     }
@@ -121,7 +103,7 @@ namespace BotScaffold
         private async Task OnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
         {
             // Check to see if the post starts with our indicator and the author wasn't a bot.
-            if (args.Message.Content.StartsWith(Indicator) && !args.Author.IsBot)
+            if (args.Message.Content.StartsWith(Config.Indicator) && !args.Author.IsBot)
             {
                 // Get the command level so we can filter out commands this user can't access.
                 CommandLevel level = await GetCommandLevelAsync(args.Guild, args.Author.Id);
@@ -177,10 +159,11 @@ namespace BotScaffold
         /// </summary>
         /// <param name="other">The bot whose client to attach this bot to.</param>
         /// <returns>A task that can be stopped using the Stop() method.</returns>
-        public async Task AttachToAsync(Bot other)
+        public async Task AttachToAsync<TOtherConfig>(Bot<TOtherConfig> other) where TOtherConfig : BotConfig
         {
             try
             {
+                LoadConfig();
                 OnStartup();
                 
                 Client = other.Client;
@@ -212,11 +195,12 @@ namespace BotScaffold
         {
             try
             {
+                LoadConfig();
                 OnStartup();
                 
                 Client = new DiscordClient(new DiscordConfiguration()
                 {
-                    Token = Token,
+                    Token = Config.Token,
                     TokenType = TokenType.Bot
                 });
 

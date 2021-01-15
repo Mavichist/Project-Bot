@@ -1,6 +1,4 @@
 ﻿using System.Threading.Tasks;
-using BotScaffold;
-using DSharpPlus;
 using ProjectBot;
 
 namespace BotTests
@@ -18,9 +16,7 @@ namespace BotTests
         /// <param name="args">Command-line arguments supplied to the program.</param>
         public static void Main(string[] args)
         {
-            ClientDetails details = ClientDetails.LoadFrom("clientdetails.json");
-            
-            ProjectManagerBot bot = new ProjectManagerBot(details);
+            ProjectManagerBot bot = new ProjectManagerBot("ProjectBot");
             Task b1 = bot.RunAsync();
 
             Task.WaitAll(b1);

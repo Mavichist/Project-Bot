@@ -13,7 +13,7 @@ namespace ProjectBot
     /// <summary>
     /// A bot for managing projects, in the form of hidden role-accessed channels.
     /// </summary>
-    public class ProjectManagerBot : Bot
+    public class ProjectManagerBot : Bot<BotConfig>
     {
         public static readonly string SAVE_DIRECTORY = "Project_Servers";
 
@@ -32,7 +32,7 @@ namespace ProjectBot
         /// Creates a new instance of the project bot.
         /// </summary>
         /// <param name="details">The client details to construct the bot with.</param>
-        public ProjectManagerBot(ClientDetails details) : base(details)
+        public ProjectManagerBot(string name) : base(name)
         {
 
         }
@@ -87,7 +87,7 @@ namespace ProjectBot
                 // the relevant roles can. We also need to make the bot itself a member of the channel,
                 // otherwise any attempts to edit the channel will fail (authentication error). This
                 // happens because the bot technically can't "see" the channel after we set it invisible.
-                await channel.AddOverwriteAsync(await args.Guild.GetMemberAsync(ID), Permissions.AccessChannels);
+                await channel.AddOverwriteAsync(await args.Guild.GetMemberAsync(Config.ID), Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(args.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(curatorRole, Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(memberRole, Permissions.AccessChannels);
