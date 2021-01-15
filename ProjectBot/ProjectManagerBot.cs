@@ -83,6 +83,7 @@ namespace ProjectBot
                 var memberRole = await args.Guild.CreateRoleAsync($"{name} Member");
                 var channel = await args.Guild.CreateChannelAsync($"{name} Chat", ChannelType.Text, category);
 
+                await channel.AddOverwriteAsync(await args.Guild.GetMemberAsync(ID), Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(args.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(curatorRole, Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(memberRole, Permissions.AccessChannels);
