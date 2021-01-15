@@ -83,6 +83,10 @@ namespace ProjectBot
                 var memberRole = await args.Guild.CreateRoleAsync($"{name} Member");
                 var channel = await args.Guild.CreateChannelAsync($"{name} Chat", ChannelType.Text, category);
 
+                // We need to set up the channel so that everyone else can't see it, but people with
+                // the relevant roles can. We also need to make the bot itself a member of the channel,
+                // otherwise any attempts to edit the channel will fail (authentication error). This
+                // happens because the bot technically can't "see" the channel after we set it invisible.
                 await channel.AddOverwriteAsync(await args.Guild.GetMemberAsync(ID), Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(args.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(curatorRole, Permissions.AccessChannels);

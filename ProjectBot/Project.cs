@@ -37,7 +37,6 @@ namespace ProjectBot
         /// <summary>
         /// Each project has a member role, identified by this number.
         /// </summary>
-        /// <value></value>
         [JsonInclude]
         public ulong MemberRoleID
         {
