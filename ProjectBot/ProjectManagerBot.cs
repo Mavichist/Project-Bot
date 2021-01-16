@@ -87,7 +87,7 @@ namespace ProjectBot
                 // the relevant roles can. We also need to make the bot itself a member of the channel,
                 // otherwise any attempts to edit the channel will fail (authentication error). This
                 // happens because the bot technically can't "see" the channel after we set it invisible.
-                await channel.AddOverwriteAsync(await args.Guild.GetMemberAsync(Config.ID), Permissions.AccessChannels);
+                await channel.AddOverwriteAsync(await args.Guild.GetMemberAsync(Details.ID), Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(args.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(curatorRole, Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(memberRole, Permissions.AccessChannels);

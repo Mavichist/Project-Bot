@@ -50,7 +50,15 @@ namespace BotScaffold
             get;
             set;
         }
-        
+        /// <summary>
+        /// The client ID and token for interacting with the Discord API.
+        /// </summary>
+        public ClientDetails Details
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Creates a new instance of a Discord bot, with the specified details.
         /// </summary>
@@ -61,6 +69,9 @@ namespace BotScaffold
             Commands = Command.GetCommands(this);
         }
 
+        /// <summary>
+        /// Loads the config file associated with this bot.
+        /// </summary>
         private void LoadConfig()
         {
             Config = BotConfig.Load<TConfig>(Name);
@@ -74,12 +85,16 @@ namespace BotScaffold
         private async Task<CommandLevel> GetCommandLevelAsync(DiscordGuild guild, ulong userID)
         {
             DiscordMember member = await guild.GetMemberAsync(userID);
+            
+            // If the member is the owner of the server, they can execute any command.
             if (member.IsOwner)
             {
                 return CommandLevel.Owner;
             }
             else
             {
+                // We need to find an admin role in the member's role list for them to be considered
+                // an admin.
                 foreach (var role in member.Roles)
                 {
                     if (Config.AdminRoleIDs.Contains(role.Id))
@@ -87,6 +102,8 @@ namespace BotScaffold
                         return CommandLevel.Admin;
                     }
                 }
+                // In all other cases, the user is not an admin and not the server owner, so they
+                // only have base-level access.
                 return CommandLevel.Unrestricted;
             }
         }
@@ -165,6 +182,8 @@ namespace BotScaffold
             {
                 LoadConfig();
                 OnStartup();
+
+                Details = other.Details;
                 
                 Client = other.Client;
 
@@ -191,16 +210,18 @@ namespace BotScaffold
         /// Runs the bot as a new task that terminates when the bot is shut down.
         /// </summary>
         /// <returns>A task that can be stopped using the Stop() method.</returns>
-        public async Task RunAsync()
+        public async Task RunAsync(ClientDetails details)
         {
             try
             {
                 LoadConfig();
                 OnStartup();
                 
+                Details = details;
+                
                 Client = new DiscordClient(new DiscordConfiguration()
                 {
-                    Token = Config.Token,
+                    Token = Details.Token,
                     TokenType = TokenType.Bot
                 });
 

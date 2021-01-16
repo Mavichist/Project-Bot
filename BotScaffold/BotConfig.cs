@@ -10,24 +10,6 @@ namespace BotScaffold
         public static readonly string CONFIG_FOLDER = "Config";
         
         /// <summary>
-        /// The identifying number for this client on Discord.
-        /// </summary>
-        [JsonInclude]
-        public ulong ID
-        {
-            get;
-            private set;
-        }
-        /// <summary>
-        /// The token for this client on Discord.
-        /// </summary>
-        [JsonInclude]
-        public string Token
-        {
-            get;
-            private set;
-        }
-        /// <summary>
         /// All commands processed by this bot must begin with this character.
         /// </summary>
         [JsonInclude]
@@ -59,18 +41,16 @@ namespace BotScaffold
         /// <param name="id">The bot client ID.</param>
         /// <param name="token">The token for interacting with the Discord API.</param>
         /// <param name="indicator">The character that indicates the start of a command.</param>
-        public BotConfig(ulong id, string token, char indicator) : this()
+        public BotConfig(char indicator) : this()
         {
-            ID = id;
-            Token = token;
             Indicator = indicator;
         }
 
         /// <summary>
         /// Saves the config object to the specified file within the shared config folder.
         /// </summary>
-        /// <param name="fileName">The name of the json file within the config folder.</param>
-        public void Save(string fileName)
+        /// <param name="botName">The name of bot whose config we want to save.</param>
+        public void Save(string botName)
         {
             if (!Directory.Exists(CONFIG_FOLDER))
             {
@@ -82,24 +62,24 @@ namespace BotScaffold
                 WriteIndented = true
             };
             string json = JsonSerializer.Serialize(this, options);
-            File.WriteAllText($"{CONFIG_FOLDER}/{fileName}.json", json);
+            File.WriteAllText($"{CONFIG_FOLDER}/{botName}.json", json);
         }
     
         /// <summary>
         /// Loads a config object from the specified file within the 
         /// </summary>
-        /// <param name="fileName">The name of the json file within the config folder.</param>
+        /// <param name="botName">The name of the bot whose config we want to load.</param>
         /// <typeparam name="TConfig">The type of the config object.</typeparam>
         /// <returns>The config object located at the file location.</returns>
-        public static TConfig Load<TConfig>(string fileName) where TConfig : BotConfig
+        public static TConfig Load<TConfig>(string botName) where TConfig : BotConfig
         {
-            if (File.Exists($"{CONFIG_FOLDER}/{fileName}.json"))
+            if (File.Exists($"{CONFIG_FOLDER}/{botName}.json"))
             {
                 JsonSerializerOptions options = new JsonSerializerOptions()
                 {
                     WriteIndented = true
                 };
-                string json = File.ReadAllText($"{CONFIG_FOLDER}/{fileName}.json");
+                string json = File.ReadAllText($"{CONFIG_FOLDER}/{botName}.json");
                 return JsonSerializer.Deserialize<TConfig>(json, options);
             }
             else
