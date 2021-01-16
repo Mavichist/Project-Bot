@@ -1,0 +1,8 @@
+{
+    "Indicator":"!",
+    "AdminRoleIDs":[
+        1234,
+        456,
+        789
+    ]
+}

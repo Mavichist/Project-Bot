@@ -19,7 +19,7 @@ namespace BotTests
         {
             ProjectManagerBot bot = new ProjectManagerBot("ProjectBot");
             
-            ClientDetails details = ClientDetails.Load("clientdetails.json");
+            ClientDetails details = ClientDetails.Load("ClientDetails.json");
             Task b1 = bot.RunAsync(details);
 
             Task.WaitAll(b1);
