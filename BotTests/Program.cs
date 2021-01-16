@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using BotScaffold;
 using ProjectBot;
+using RoleBot;
 
 namespace BotTests
 {
@@ -17,12 +18,14 @@ namespace BotTests
         /// <param name="args">Command-line arguments supplied to the program.</param>
         public static void Main(string[] args)
         {
-            ProjectManagerBot bot = new ProjectManagerBot("ProjectBot");
+            ProjectManagerBot projBot = new ProjectManagerBot("ProjectBot");
+            RoleManagerBot roleBot = new RoleManagerBot("RoleBot");
             
             ClientDetails details = ClientDetails.Load("ClientDetails.json");
-            Task b1 = bot.RunAsync(details);
+            Task b1 = projBot.RunAsync(details);
+            Task b2 = roleBot.AttachToAsync(projBot);
 
-            Task.WaitAll(b1);
+            Task.WaitAll(b1, b2);
             System.Console.WriteLine("Finished.");
         }
     }

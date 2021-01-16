@@ -126,6 +126,7 @@ namespace BotScaffold
                 {
                     CommandCallback callback = m.CreateDelegate<CommandCallback>(o);
                     commands.Add(new Command(attr.CommandString, attr.ParameterRegex, callback, attr.CommandLevel));
+                    Console.WriteLine($"Added \"{attr.CommandString}\" to {o}.");
                 }
             }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -21,10 +22,10 @@ namespace BotScaffold
         /// <summary>
         /// Contains configuration information for this bot.
         /// </summary>
-        public TConfig Config
+        private Dictionary<ulong, TConfig> ServerConfigs
         {
             get;
-            private set;
+            set;
         }
         /// <summary>
         /// A cancellation token for stopping the client worker thread.
@@ -74,7 +75,31 @@ namespace BotScaffold
         /// </summary>
         private void LoadConfig()
         {
-            Config = BotConfig.Load<TConfig>(Name);
+            ServerConfigs = BotConfig.LoadAll<TConfig>(Name);
+        }
+        /// <summary>
+        /// Saves the bot's config data structure to the config folder.
+        /// </summary>
+        private void SaveConfig()
+        {
+            foreach (var serverConfig in ServerConfigs)
+            {
+                BotConfig.Save(serverConfig.Value, Name, serverConfig.Key);
+            }
+        }
+        /// <summary>
+        /// Retrieves the configuration for a specific guild.
+        /// </summary>
+        /// <param name="guild"></param>
+        /// <returns>The configuration data structure for this guild.</returns>
+        protected TConfig GetConfig(DiscordGuild guild)
+        {
+            if (!ServerConfigs.TryGetValue(guild.Id, out TConfig config))
+            {
+                config = CreateDefaultConfig();
+                ServerConfigs.Add(guild.Id, config);
+            }
+            return config;
         }
         /// <summary>
         /// Determines the level of commands the user is capable of executing.
@@ -84,6 +109,7 @@ namespace BotScaffold
         /// <returns>The command level the user can access.</returns>
         private async Task<CommandLevel> GetCommandLevelAsync(DiscordGuild guild, ulong userID)
         {
+            TConfig config = GetConfig(guild);
             DiscordMember member = await guild.GetMemberAsync(userID);
             
             // If the member is the owner of the server, they can execute any command.
@@ -97,7 +123,7 @@ namespace BotScaffold
                 // an admin.
                 foreach (var role in member.Roles)
                 {
-                    if (Config.AdminRoleIDs.Contains(role.Id))
+                    if (config.AdminRoleIDs.Contains(role.Id))
                     {
                         return CommandLevel.Admin;
                     }
@@ -114,13 +140,15 @@ namespace BotScaffold
         /// The first command to succeed is the only one that runs, which is why sorting the command
         /// list in order of specificity is important.
         /// </summary>
-        /// <param name="sender">The discord client sending the message.</param>
+        /// <param name="client">The discord client sending the message.</param>
         /// <param name="args">An object describing the context of the message sent.</param>
         /// <returns>A task to handle processing of the command.</returns>
-        private async Task OnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
+        private async Task OnMessageCreated(DiscordClient client, MessageCreateEventArgs args)
         {
+            TConfig config = GetConfig(args.Guild);
+
             // Check to see if the post starts with our indicator and the author wasn't a bot.
-            if (args.Message.Content.StartsWith(Config.Indicator) && !args.Author.IsBot)
+            if (args.Message.Content.StartsWith(config.Indicator) && !args.Author.IsBot)
             {
                 // Get the command level so we can filter out commands this user can't access.
                 CommandLevel level = await GetCommandLevelAsync(args.Guild, args.Author.Id);
@@ -146,10 +174,24 @@ namespace BotScaffold
         }
 
         /// <summary>
+        /// A simple parameterless command for shutting down the bot.
+        /// </summary>
+        /// <param name="match">The regex match for command parameters.</param>
+        /// <param name="args">The context for the message invoking the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
+        [CommandAttribute("shutdown", CommandLevel = CommandLevel.Admin)]
+        protected async Task Shutdown(Match match, MessageCreateEventArgs args)
+        {
+            await args.Channel.SendMessageAsync("Shutting down...");
+            Stop();
+        }
+
+        /// <summary>
         /// Occurs when the bot is first run.
         /// </summary>
         protected virtual void OnStartup()
         {
+            LoadConfig();
             Console.WriteLine("Starting up...");
         }
         /// <summary>
@@ -157,6 +199,7 @@ namespace BotScaffold
         /// </summary>
         protected virtual void OnShutdown()
         {
+            SaveConfig();
             Console.WriteLine("Shutting down...");
         }
         /// <summary>
@@ -180,7 +223,6 @@ namespace BotScaffold
         {
             try
             {
-                LoadConfig();
                 OnStartup();
 
                 Details = other.Details;
@@ -214,7 +256,6 @@ namespace BotScaffold
         {
             try
             {
-                LoadConfig();
                 OnStartup();
                 
                 Details = details;
@@ -253,5 +294,10 @@ namespace BotScaffold
         {
             CancellationSource.Cancel();
         }
+        /// <summary>
+        /// Creates a default config data structure for new servers.
+        /// </summary>
+        /// <returns>a config data structure.</returns>
+        public abstract TConfig CreateDefaultConfig();
     }
 }

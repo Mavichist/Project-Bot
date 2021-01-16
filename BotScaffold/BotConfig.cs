@@ -49,31 +49,25 @@ namespace BotScaffold
         /// <summary>
         /// Saves the config object to the specified file within the shared config folder.
         /// </summary>
+        /// <param name="config">The config object to save.</param>
         /// <param name="botName">The name of bot whose config we want to save.</param>
-        public void Save(string botName)
+        public static void Save<TConfig>(TConfig config, string botName, ulong guildID)
         {
-            if (!Directory.Exists(CONFIG_FOLDER))
+            if (!Directory.Exists($"{CONFIG_FOLDER}/{botName}"))
             {
-                Directory.CreateDirectory(CONFIG_FOLDER);
+                Directory.CreateDirectory($"{CONFIG_FOLDER}/{botName}");
             }
 
             JsonSerializerOptions options = new JsonSerializerOptions()
             {
                 WriteIndented = true
             };
-            string json = JsonSerializer.Serialize(this, options);
-            File.WriteAllText($"{CONFIG_FOLDER}/{botName}.json", json);
+            string json = JsonSerializer.Serialize(config, options);
+            File.WriteAllText($"{CONFIG_FOLDER}/{botName}/{guildID}.json", json);
         }
-    
-        /// <summary>
-        /// Loads a config object from the specified file within the 
-        /// </summary>
-        /// <param name="botName">The name of the bot whose config we want to load.</param>
-        /// <typeparam name="TConfig">The type of the config object.</typeparam>
-        /// <returns>The config object located at the file location.</returns>
-        public static TConfig Load<TConfig>(string botName) where TConfig : BotConfig
+        public static TConfig Load<TConfig>(string botName, ulong guildID) where TConfig : BotConfig
         {
-            if (File.Exists($"{CONFIG_FOLDER}/{botName}.json"))
+            if (File.Exists($"{CONFIG_FOLDER}/{botName}/{guildID}.json"))
             {
                 JsonSerializerOptions options = new JsonSerializerOptions()
                 {
@@ -86,6 +80,24 @@ namespace BotScaffold
             {
                 return null;
             }
+        }
+        public static Dictionary<ulong, TConfig> LoadAll<TConfig>(string botName) where TConfig : BotConfig
+        {
+            Dictionary<ulong, TConfig> serverConfig = new Dictionary<ulong, TConfig>();
+            if (Directory.Exists($"{CONFIG_FOLDER}/{botName}"))
+            {
+                foreach (string fileName in Directory.EnumerateFiles($"{CONFIG_FOLDER}/{botName}", "*.json"))
+                {
+                    FileInfo fi = new FileInfo(fileName);
+                    if (ulong.TryParse(Path.GetFileNameWithoutExtension(fileName), out ulong guildID))
+                    {
+                        string json = File.ReadAllText(fileName);
+                        TConfig config = JsonSerializer.Deserialize<TConfig>(json);
+                        serverConfig.Add(guildID, config);
+                    }
+                }
+            }
+            return serverConfig;
         }
     }
 }
