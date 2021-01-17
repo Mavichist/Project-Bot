@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -46,7 +45,7 @@ namespace BotScaffold
         /// <summary>
         /// A list of commands, sorted from most specific to least specific.
         /// </summary>
-        private List<Command> Commands
+        private List<Command<TConfig>> Commands
         {
             get;
             set;
@@ -67,7 +66,7 @@ namespace BotScaffold
         public Bot(string name)
         {
             Name = name;
-            Commands = Command.GetCommands(this);
+            Commands = Command<TConfig>.GetCommands<TConfig>(this);
         }
 
         /// <summary>
@@ -92,7 +91,7 @@ namespace BotScaffold
         /// </summary>
         /// <param name="guild"></param>
         /// <returns>The configuration data structure for this guild.</returns>
-        protected TConfig GetConfig(DiscordGuild guild)
+        private TConfig GetConfig(DiscordGuild guild)
         {
             if (!ServerConfigs.TryGetValue(guild.Id, out TConfig config))
             {
@@ -101,6 +100,7 @@ namespace BotScaffold
             }
             return config;
         }
+        
         /// <summary>
         /// Determines the level of commands the user is capable of executing.
         /// </summary>
@@ -146,20 +146,20 @@ namespace BotScaffold
         private async Task OnMessageCreated(DiscordClient client, MessageCreateEventArgs args)
         {
             TConfig config = GetConfig(args.Guild);
-
+            
             // Check to see if the post starts with our indicator and the author wasn't a bot.
             if (args.Message.Content.StartsWith(config.Indicator) && !args.Author.IsBot)
             {
                 // Get the command level so we can filter out commands this user can't access.
                 CommandLevel level = await GetCommandLevelAsync(args.Guild, args.Author.Id);
                 bool commandFound = false;
-                foreach (Command c in Commands)
+                foreach (Command<TConfig> c in Commands)
                 {
                     // Only if the command is lower or equal to the user level do we attempt to run it.
                     if (c.CommandLevel <= level)
                     {
                         // If the regex matches and the command succeeds, we can skip the rest.
-                        if (await c.AttemptAsync(args))
+                        if (await c.AttemptAsync(args, config))
                         {
                             commandFound = true;
                             break;
@@ -172,6 +172,38 @@ namespace BotScaffold
                 }
             }
         }
+        /// <summary>
+        /// When an emoji is added to a post the bot will identify whether the relevant message is
+        /// one of its own, then react accordingly by firing applicable reaction methods.
+        /// </summary>
+        /// <param name="client">The discord client sending the message.</param>
+        /// <param name="args">An object describing the context of the message sent.</param>
+        /// <returns>A task to handle processing of the command.</returns>
+        private async Task OnReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
+        {
+            if (args.Message.Author.Id == Details.ID)
+            {
+                TConfig config = GetConfig(args.Guild);
+
+                await ReactionAdded(new ReactionAddArgs<TConfig>(args, config));
+            }
+        }
+        /// <summary>
+        /// When an emoji is removed from a post the bot will identify whether the relevant message
+        /// is one of its own, then react accordingly by firing applicable reaction methods.
+        /// </summary>
+        /// <param name="client">The discord client sending the message.</param>
+        /// <param name="args">An object describing the context of the message sent.</param>
+        /// <returns>A task to handle processing of the command.</returns>
+        private async Task OnReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
+        {
+            if (args.Message.Author.Id == Details.ID)
+            {
+                TConfig config = GetConfig(args.Guild);
+
+                await ReactionRemoved(new ReactionRemoveArgs<TConfig>(args, config));
+            }
+        }
 
         /// <summary>
         /// A simple parameterless command for shutting down the bot.
@@ -180,12 +212,11 @@ namespace BotScaffold
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("shutdown", CommandLevel = CommandLevel.Admin)]
-        protected async Task Shutdown(Match match, MessageCreateEventArgs args)
+        protected async Task Shutdown(CommandArgs<TConfig> args)
         {
             await args.Channel.SendMessageAsync("Shutting down...");
             Stop();
         }
-
         /// <summary>
         /// Occurs when the bot is first run.
         /// </summary>
@@ -210,6 +241,29 @@ namespace BotScaffold
         {
             Console.WriteLine("Connected.");
         }
+        /// <summary>
+        /// Creates a default config data structure for new servers.
+        /// </summary>
+        /// <returns>a config data structure.</returns>
+        protected abstract TConfig CreateDefaultConfig();
+        /// <summary>
+        /// Called when one of this bot's posts has a reaction removed.
+        /// </summary>
+        /// <param name="args">The context for the reaction removal.</param>
+        /// <returns>A task for handling the reaction.</returns>
+        protected virtual async Task ReactionRemoved(ReactionRemoveArgs<TConfig> args)
+        {
+
+        }
+        /// <summary>
+        /// Called when one of this bot's posts has a reaction added.
+        /// </summary>
+        /// <param name="args">The context for the reaction addition.</param>
+        /// <returns>A task for handling the reaction.</returns>
+        protected virtual async Task ReactionAdded(ReactionAddArgs<TConfig> args)
+        {
+
+        }
 
         /// <summary>
         /// Attaches this bot to the client of an existing bot.
@@ -230,6 +284,8 @@ namespace BotScaffold
                 Client = other.Client;
 
                 Client.MessageCreated += OnMessageCreated;
+                Client.MessageReactionAdded += OnReactionAdded;
+                Client.MessageReactionRemoved += OnReactionRemoved;
 
                 OnConnected(Client);
 
@@ -237,6 +293,8 @@ namespace BotScaffold
                 await Task.Delay(-1, CancellationSource.Token);
 
                 Client.MessageCreated -= OnMessageCreated;
+                Client.MessageReactionAdded -= OnReactionAdded;
+                Client.MessageReactionRemoved -= OnReactionRemoved;
             }
             catch (TaskCanceledException tce)
             {
@@ -269,6 +327,8 @@ namespace BotScaffold
                 await Client.ConnectAsync();
 
                 Client.MessageCreated += OnMessageCreated;
+                Client.MessageReactionAdded += OnReactionAdded;
+                Client.MessageReactionRemoved += OnReactionRemoved;
 
                 OnConnected(Client);
 
@@ -294,10 +354,5 @@ namespace BotScaffold
         {
             CancellationSource.Cancel();
         }
-        /// <summary>
-        /// Creates a default config data structure for new servers.
-        /// </summary>
-        /// <returns>a config data structure.</returns>
-        public abstract TConfig CreateDefaultConfig();
     }
 }

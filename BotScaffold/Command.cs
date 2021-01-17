@@ -8,12 +8,12 @@ using DSharpPlus.EventArgs;
 namespace BotScaffold
 {
     public enum CommandLevel { Unrestricted = 0, Admin = 1, Owner = 2 }
-    public delegate Task CommandCallback(Match match, MessageCreateEventArgs args);
+    public delegate Task CommandCallback<TConfig>(CommandArgs<TConfig> args) where TConfig : BotConfig;
 
     /// <summary>
     /// A simple class for handling command strings and their corresponding actions.
     /// </summary>
-    public class Command : IComparable<Command>
+    public class Command<TConfig> : IComparable<Command<TConfig>> where TConfig : BotConfig
     {
         /// <summary>
         /// The entire command portion of the user input.
@@ -27,7 +27,7 @@ namespace BotScaffold
         /// <summary>
         /// A delegate to the method that will handle this command.
         /// </summary>
-        public CommandCallback Callback
+        public CommandCallback<TConfig> Callback
         {
             get;
             private set;
@@ -55,7 +55,7 @@ namespace BotScaffold
         /// <param name="commandString">The string that identifies the command.</param>
         /// <param name="parameterRegex">A regular expression for extracting parameter values.</param>
         /// <param name="callback">The callback that handles the command execution.</param>
-        public Command(string commandString, string parameterRegex, CommandCallback callback, CommandLevel commandLevel)
+        public Command(string commandString, string parameterRegex, CommandCallback<TConfig> callback, CommandLevel commandLevel)
         {
             CommandString = commandString;
             ParameterRegex = parameterRegex;
@@ -68,12 +68,12 @@ namespace BotScaffold
         /// </summary>
         /// <param name="args">The message context used to invoke this command attempt.</param>
         /// <returns>A boolean indicating whether the attempt was successful.</returns>
-        public async Task<bool> AttemptAsync(MessageCreateEventArgs args)
+        public async Task<bool> AttemptAsync(MessageCreateEventArgs args, TConfig config)
         {
             Match m = Regex.Match(args.Message.Content, $"(?:{CommandString})\\s*{ParameterRegex}");
             if (m.Success)
             {
-                await Callback(m, args);
+                await Callback(new CommandArgs<TConfig>(m, args, config));
                 return true;
             }
             else return false;
@@ -95,7 +95,7 @@ namespace BotScaffold
         /// </summary>
         /// <param name="other">The other command to compare with.</param>
         /// <returns>An integer denoting the comparison.</returns>
-        public int CompareTo(Command other)
+        public int CompareTo(Command<TConfig> other)
         {
             int comp = CommandString.Length - other.CommandString.Length;
             if (comp == 0)
@@ -113,9 +113,9 @@ namespace BotScaffold
         /// generate commands from.</param>
         /// <returns>A list of commands, sorted in order of least significant command string to most
         /// significant command string.</returns>
-        public static List<Command> GetCommands(object o)
+        public static List<Command<TConfig>> GetCommands<TConfig>(object o) where TConfig : BotConfig
         {
-            List<Command> commands = new List<Command>();
+            List<Command<TConfig>> commands = new List<Command<TConfig>>();
 
             Type t = o.GetType();
 
@@ -124,8 +124,8 @@ namespace BotScaffold
                 CommandAttribute attr = m.GetCustomAttribute<CommandAttribute>();
                 if (attr != null)
                 {
-                    CommandCallback callback = m.CreateDelegate<CommandCallback>(o);
-                    commands.Add(new Command(attr.CommandString, attr.ParameterRegex, callback, attr.CommandLevel));
+                    CommandCallback<TConfig> callback = m.CreateDelegate<CommandCallback<TConfig>>(o);
+                    commands.Add(new Command<TConfig>(attr.CommandString, attr.ParameterRegex, callback, attr.CommandLevel));
                     Console.WriteLine($"Added \"{attr.CommandString}\" to {o}.");
                 }
             }

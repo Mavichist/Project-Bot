@@ -65,6 +65,13 @@ namespace BotScaffold
             string json = JsonSerializer.Serialize(config, options);
             File.WriteAllText($"{CONFIG_FOLDER}/{botName}/{guildID}.json", json);
         }
+        /// <summary>
+        /// Loads a config object for the specified bot and guild.
+        /// </summary>
+        /// <param name="botName">The name of the bot.</param>
+        /// <param name="guildID">The ID for the guild.</param>
+        /// <typeparam name="TConfig">The config object type.</typeparam>
+        /// <returns>The config object for the bot and guild.</returns>
         public static TConfig Load<TConfig>(string botName, ulong guildID) where TConfig : BotConfig
         {
             if (File.Exists($"{CONFIG_FOLDER}/{botName}/{guildID}.json"))
@@ -81,6 +88,12 @@ namespace BotScaffold
                 return null;
             }
         }
+        /// <summary>
+        /// Loads a series of config objects for a specified bot.
+        /// </summary>
+        /// <param name="botName">The name of the bot to load config objects for.</param>
+        /// <typeparam name="TConfig">The config object type.</typeparam>
+        /// <returns>A dictionary containing all the server/guild configuration objects for that bot.</returns>
         public static Dictionary<ulong, TConfig> LoadAll<TConfig>(string botName) where TConfig : BotConfig
         {
             Dictionary<ulong, TConfig> serverConfig = new Dictionary<ulong, TConfig>();

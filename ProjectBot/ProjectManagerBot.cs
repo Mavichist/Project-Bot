@@ -1,10 +1,7 @@
-using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using BotScaffold;
 
 namespace ProjectBot
@@ -32,27 +29,25 @@ namespace ProjectBot
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project add", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
-        private async Task AddProject(Match match, MessageCreateEventArgs args)
+        private async Task AddProject(CommandArgs<ProjectBotConfig> args)
         {
-            ProjectBotConfig config = GetConfig(args.Guild);
-
-            string name = match.Groups["name"].Value;
+            string name = args["name"];
             await args.Channel.SendMessageAsync($"Adding \"{name}\" to project list...");
 
             // Create the server and project category, or retrieve them if they exist already.
             DiscordChannel category;
-            if (config.ProjectCategoryID == 0)
+            if (args.Config.ProjectCategoryID == 0)
             {
                 category = await args.Guild.CreateChannelCategoryAsync("Projects");
-                config.ProjectCategoryID = category.Id;
+                args.Config.ProjectCategoryID = category.Id;
             }
             else
             {
-                category = args.Guild.GetChannel(config.ProjectCategoryID);
+                category = args.Guild.GetChannel(args.Config.ProjectCategoryID);
             }
 
             // Create the project roles and channel if they don't exist, then set up permissions.
-            if (!config.Projects.ContainsKey(name))
+            if (!args.Config.Projects.ContainsKey(name))
             {
                 var curatorRole = await args.Guild.CreateRoleAsync($"{name} Curator");
                 var memberRole = await args.Guild.CreateRoleAsync($"{name} Member");
@@ -67,7 +62,7 @@ namespace ProjectBot
                 await channel.AddOverwriteAsync(curatorRole, Permissions.AccessChannels);
                 await channel.AddOverwriteAsync(memberRole, Permissions.AccessChannels);
 
-                config.Projects.Add(name, new Project(name, channel.Id, curatorRole.Id, memberRole.Id));
+                args.Config.Projects.Add(name, new Project(name, channel.Id, curatorRole.Id, memberRole.Id));
 
                 await args.Channel.SendMessageAsync($"Added \"{name}\" to this server.");
             }
@@ -83,15 +78,13 @@ namespace ProjectBot
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project remove", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
-        private async Task RemoveProject(Match match, MessageCreateEventArgs args)
+        private async Task RemoveProject(CommandArgs<ProjectBotConfig> args)
         {
-            ProjectBotConfig config = GetConfig(args.Guild);
-
-            string name = match.Groups["name"].Value;
+            string name = args["name"];
             await args.Channel.SendMessageAsync($"Removing \"{name}\" from project list...");
 
             // If the project exists, retrieve and delete the associated roles and channels.
-            if (config.Projects.TryGetValue(name, out Project project))
+            if (args.Config.Projects.TryGetValue(name, out Project project))
             {
                 var curatorRole = args.Guild.GetRole(project.CuratorRoleID);
                 var memberRole = args.Guild.GetRole(project.MemberRoleID);
@@ -101,7 +94,7 @@ namespace ProjectBot
                 await memberRole.DeleteAsync();
                 await channel.DeleteAsync();
 
-                config.Projects.Remove(name);
+                args.Config.Projects.Remove(name);
                 await args.Channel.SendMessageAsync($"Removed \"{name}\" from this server.");
             }
             else
@@ -116,13 +109,11 @@ namespace ProjectBot
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project list", CommandLevel = CommandLevel.Unrestricted)]
-        private async Task ListProjects(Match match, MessageCreateEventArgs args)
+        private async Task ListProjects(CommandArgs<ProjectBotConfig> args)
         {
-            ProjectBotConfig config = GetConfig(args.Guild);
-
             StringBuilder list = new StringBuilder();
             list.Append("```\nProjects:\n");
-            foreach (var project in config.Projects.Values)
+            foreach (var project in args.Config.Projects.Values)
             {
                 list.Append($"\t{project.Name}\n");
             }
@@ -136,17 +127,15 @@ namespace ProjectBot
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project set category", CommandLevel = CommandLevel.Admin, ParameterRegex = "<#(?<channelID>\\d+)>")]
-        private async Task SetProjectCategory(Match match, MessageCreateEventArgs args)
+        private async Task SetProjectCategory(CommandArgs<ProjectBotConfig> args)
         {
-            ProjectBotConfig config = GetConfig(args.Guild);
-
-            ulong categoryID = ulong.Parse(match.Groups["channelID"].Value);
+            ulong categoryID = ulong.Parse(args["channelID"]);
             DiscordChannel category = args.Guild.GetChannel(categoryID);
             if (category != null)
             {
                 if (category.IsCategory)
                 {
-                    config.ProjectCategoryID = categoryID;
+                    args.Config.ProjectCategoryID = categoryID;
                     await args.Channel.SendMessageAsync($"**{category.Name}** is now the project category.");
                 }
                 else
@@ -164,7 +153,7 @@ namespace ProjectBot
         /// Creates a default config data structure for new servers.
         /// </summary>
         /// <returns>a config data structure.</returns>
-        public override ProjectBotConfig CreateDefaultConfig()
+        protected override ProjectBotConfig CreateDefaultConfig()
         {
             return new ProjectBotConfig('!', 0);
         }
