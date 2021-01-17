@@ -11,8 +11,6 @@ namespace ProjectBot
     /// </summary>
     public class ProjectManagerBot : Bot<ProjectBotConfig>
     {
-        public static readonly string SAVE_DIRECTORY = "Project_Servers";
-
         /// <summary>
         /// Creates a new instance of the project bot.
         /// </summary>
