@@ -166,10 +166,6 @@ namespace BotScaffold
                         }
                     }
                 }
-                if (!commandFound)
-                {
-                    await args.Channel.SendMessageAsync("Invalid command/auth.");
-                }
             }
         }
         /// <summary>
