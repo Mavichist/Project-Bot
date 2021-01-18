@@ -12,6 +12,9 @@ namespace BotScaffold
     public delegate void BotShutdownCallback();
     public delegate void BotConnectedCallback();
 
+    /// <summary>
+    /// An instance that runs several bots (really bot extensions) at once.
+    /// </summary>
     public class BotInstance
     {
         /// <summary>

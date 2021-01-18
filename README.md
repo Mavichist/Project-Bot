@@ -11,39 +11,43 @@ By adding more projects to this solution, additional bots can be created indepen
 ### BotScaffold
 The bot scaffold project defines a base class for bots, as well as a system for implementing commands.
 
-The bot scaffold consists of the `Bot` base class, which future bots should inherit from. It provides core functionality and simplifies the underlying DSharpPlus calls.
+The bot scaffold consists of the `BotInstance.Bot` base class, which future bots should inherit from. It provides core functionality and simplifies the underlying DSharpPlus calls.
 
-The `Command` and `CommandAttribute` classes are used by the `Bot` class and form the basis of new bot commands. Classes inheriting from `Bot` can automate the registration of commands using the `CommandAttribute` system.
+The `Command` and `CommandAttribute` classes are used by the `BotInstance.Bot` class and form the basis of new bot commands. Classes inheriting from `BotInstance.Bot` can automate the registration of commands using the `CommandAttribute` system.
 
-When creating a new bot using the scaffold, create a new class and inherit from `Bot`. To register commands and add functionality to the bot, create either public or private methods that match the `CommandCallback` delegate type and tag them with the `CommandAttribute` attribute. You can register the command string, as well as a regular expression for extracting parameters, in the constructor of the attribute.
+When creating a new bot using the scaffold, create a new class and inherit from `BotInstance.Bot`. To register commands and add functionality to the bot, create either public or private methods that match the `CommandCallback` delegate type and tag them with the `CommandAttribute` attribute. You can register the command string, as well as a regular expression for extracting parameters, in the constructor of the attribute.
 
 Commands in this framework consist of a `command string`, followed by `command parameters`. To simplify parsing and regex, parameters must always follow the command string, and the command string must be contiguous.
 
 For example; `!start goblin "cheeky"` is a valid command because the command string (`start goblin`) comes before the parameter (`"cheeky"`). An invalid interpretation of the same command would be something like; `!goblin "cheeky" start`, because the command string is broken up by parameters (and is therefore not contiguous).
 
-The `Bot` base class will construct a command list when a new instance of your bot class is created. The command methods will only be called if a valid command is entered by a user (the command is properly formatted and the regular expression matches parameters).
+The `BotInstance.Bot` base class will construct a command list when a new instance of your bot class is created. The command methods will only be called if a valid command is entered by a user (the command is properly formatted and the regular expression matches parameters).
 
 An example of a simple `Echo` bot is shown below:
 
 ```csharp
-public class EchoBot : Bot
+public class EchoBot : BotInstance.Bot<BotConfig>
 {
-    public EchoBot(ClientDetails details) : base(details)
+    public EchoBot(sing name) : base(name)
     {
         
     }
 
     [CommandAttribute("echo", ParameterRegex = "\"(?<phrase>\\w+)\"")]
-    private async Task EchoPhrase(Match match, MessageCreateEventArgs args)
+    private async Task EchoPhrase(CommandArgs<BotConfig> args)
     {
-        string phrase = match.Groups["phrase"].Value;
+        string phrase = args["phrase"];
         await args.Channel.SendMessageAsync($"Echoing: {phrase}");
     }
     [CommandAttribute("shutdown")]
-    private async Task BotShutdown(Match match, MessageCreateEventArgs args)
+    private async Task BotShutdown(CommandArgs<BotConfig> args)
     {
         await args.Channel.SendMessageAsync("Shutting down...");
-        Stop();
+        Instance.Stop();
+    }
+    protected override BotConfig CreateDefaultConfig()
+    {
+        return new BotConfig('!');
     }
 }
 ```

@@ -21,11 +21,11 @@ namespace BotTests
             ClientDetails details = ClientDetails.Load("ClientDetails.json");
             BotInstance instance = new BotInstance(details);
             
-            BasicFunctionsBot basicsBot = new BasicFunctionsBot("CoreBot");
+            CoreBot coreBot = new CoreBot("CoreBot");
             ProjectManagerBot projBot = new ProjectManagerBot("ProjectBot");
             RoleManagerBot roleBot = new RoleManagerBot("RoleBot");
 
-            basicsBot.AttachTo(instance);
+            coreBot.AttachTo(instance);
             projBot.AttachTo(instance);
             roleBot.AttachTo(instance);
 

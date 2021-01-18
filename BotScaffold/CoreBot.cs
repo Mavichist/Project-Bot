@@ -2,9 +2,16 @@ using System.Threading.Tasks;
 
 namespace BotScaffold
 {
-    public class BasicFunctionsBot : BotInstance.Bot<BotConfig>
+    /// <summary>
+    /// A very simple bot that provides basic functionality for bot instances.
+    /// </summary>
+    public class CoreBot : BotInstance.Bot<BotConfig>
     {
-        public BasicFunctionsBot(string name) : base(name)
+        /// <summary>
+        /// Creates a new instance of a core bot with the specified name.
+        /// </summary>
+        /// <param name="name">The name of the bot (used for config files).</param>
+        public CoreBot(string name) : base(name)
         {
 
         }
