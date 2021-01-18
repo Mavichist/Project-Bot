@@ -75,16 +75,25 @@ namespace BotScaffold
                 return Args.Emoji;
             }
         }
-    
+        /// <summary>
+        /// Indicates whether this reaction pertained to this bot's post.
+        /// </summary>
+        public bool ReactingToMe
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Creates a new reaction arguments object from the relevant config and event args.
         /// </summary>
         /// <param name="args">The original arguments for the reaction event.</param>
         /// <param name="config">The relevant config object for the bot and server/guild.</param>
-        public ReactionAddArgs(MessageReactionAddEventArgs args, TConfig config)
+        public ReactionAddArgs(MessageReactionAddEventArgs args, TConfig config, bool reactingToMe)
         {
             Args = args;
             Config = config;
+            ReactingToMe = reactingToMe;
         }
     }
 }

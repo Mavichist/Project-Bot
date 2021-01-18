@@ -112,14 +112,17 @@ namespace RoleBot
         /// <returns>A task for handling the reaction.</returns>
         protected override async Task ReactionAdded(ReactionAddArgs<RoleBotConfig> args)
         {
-            string emojiName = args.Emoji.GetDiscordName();
-            if (args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
+            if (args.ReactingToMe)
             {
-                DiscordRole role = args.Guild.GetRole(roleID);
-                if (role != null)
+                string emojiName = args.Emoji.GetDiscordName();
+                if (args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
                 {
-                    DiscordMember member = await args.Guild.GetMemberAsync(args.User.Id);
-                    await member.GrantRoleAsync(role, "Role bot granted.");
+                    DiscordRole role = args.Guild.GetRole(roleID);
+                    if (role != null)
+                    {
+                        DiscordMember member = await args.Guild.GetMemberAsync(args.User.Id);
+                        await member.GrantRoleAsync(role, "Role bot granted.");
+                    }
                 }
             }
         }
@@ -130,14 +133,17 @@ namespace RoleBot
         /// <returns>A task for handling the reaction.</returns>
         protected override async Task ReactionRemoved(ReactionRemoveArgs<RoleBotConfig> args)
         {
-            string emojiName = args.Emoji.GetDiscordName();
-            if (args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
+            if (args.ReactingToMe)
             {
-                DiscordRole role = args.Guild.GetRole(roleID);
-                if (role != null)
+                string emojiName = args.Emoji.GetDiscordName();
+                if (args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
                 {
-                    DiscordMember member = await args.Guild.GetMemberAsync(args.User.Id);
-                    await member.RevokeRoleAsync(role, "Role bot revoked.");
+                    DiscordRole role = args.Guild.GetRole(roleID);
+                    if (role != null)
+                    {
+                        DiscordMember member = await args.Guild.GetMemberAsync(args.User.Id);
+                        await member.RevokeRoleAsync(role, "Role bot revoked.");
+                    }
                 }
             }
         }

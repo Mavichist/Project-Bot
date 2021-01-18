@@ -177,12 +177,9 @@ namespace BotScaffold
         /// <returns>A task to handle processing of the command.</returns>
         private async Task OnReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
         {
-            if (args.Message.Author.Id == Details.ID)
-            {
-                TConfig config = GetConfig(args.Guild);
+            TConfig config = GetConfig(args.Guild);
 
-                await ReactionAdded(new ReactionAddArgs<TConfig>(args, config));
-            }
+            await ReactionAdded(new ReactionAddArgs<TConfig>(args, config, args.Message.Author.Id == Details.ID));
         }
         /// <summary>
         /// When an emoji is removed from a post the bot will identify whether the relevant message
@@ -193,12 +190,9 @@ namespace BotScaffold
         /// <returns>A task to handle processing of the command.</returns>
         private async Task OnReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
         {
-            if (args.Message.Author.Id == Details.ID)
-            {
-                TConfig config = GetConfig(args.Guild);
+            TConfig config = GetConfig(args.Guild);
 
-                await ReactionRemoved(new ReactionRemoveArgs<TConfig>(args, config));
-            }
+            await ReactionRemoved(new ReactionRemoveArgs<TConfig>(args, config, args.Message.Author.Id == Details.ID));
         }
 
         /// <summary>
