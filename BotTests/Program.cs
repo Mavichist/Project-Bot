@@ -18,14 +18,19 @@ namespace BotTests
         /// <param name="args">Command-line arguments supplied to the program.</param>
         public static void Main(string[] args)
         {
+            ClientDetails details = ClientDetails.Load("ClientDetails.json");
+            BotInstance instance = new BotInstance(details);
+            
+            BasicFunctionsBot basicsBot = new BasicFunctionsBot("CoreBot");
             ProjectManagerBot projBot = new ProjectManagerBot("ProjectBot");
             RoleManagerBot roleBot = new RoleManagerBot("RoleBot");
-            
-            ClientDetails details = ClientDetails.Load("ClientDetails.json");
-            Task b1 = projBot.RunAsync(details);
-            Task b2 = roleBot.AttachToAsync(projBot);
 
-            Task.WaitAll(b1, b2);
+            basicsBot.AttachTo(instance);
+            projBot.AttachTo(instance);
+            roleBot.AttachTo(instance);
+
+            Task.WaitAll(instance.RunAsync());
+
             System.Console.WriteLine("Finished.");
         }
     }

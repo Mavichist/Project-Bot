@@ -5,7 +5,7 @@ using DSharpPlus.Entities;
 
 namespace RoleBot
 {
-    public class RoleManagerBot : Bot<RoleBotConfig>
+    public class RoleManagerBot : BotInstance.Bot<RoleBotConfig>
     {
         /// <summary>
         /// Creates a new instance of a role manager bot with the specified name.
@@ -96,7 +96,7 @@ namespace RoleBot
             DiscordMessage message = await args.Channel.SendMessageAsync(FormatRolePost(args.Guild, args.Config));
             foreach (var emojiRole in args.Config.EmojiRoles)
             {
-                DiscordEmoji emoji = DiscordEmoji.FromName(Client, emojiRole.Key);
+                DiscordEmoji emoji = DiscordEmoji.FromName(Instance.Client, emojiRole.Key);
                 await message.CreateReactionAsync(emoji);
             }
             args.Config.RolePostID = message.Id;
@@ -120,7 +120,7 @@ namespace RoleBot
                     await message.DeleteAllReactionsAsync();
                     foreach (var emojiRole in args.Config.EmojiRoles)
                     {
-                        DiscordEmoji emoji = DiscordEmoji.FromName(Client, emojiRole.Key);
+                        DiscordEmoji emoji = DiscordEmoji.FromName(Instance.Client, emojiRole.Key);
                         await message.CreateReactionAsync(emoji);
                     }
                 }
