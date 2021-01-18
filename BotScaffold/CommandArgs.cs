@@ -5,6 +5,8 @@ using DSharpPlus.EventArgs;
 
 namespace BotScaffold
 {
+    public enum CommandState { Unhandled, Handled, ParameterError }
+
     /// <summary>
     /// Encapsulates DSharpPlus objects, config and command parameters.
     /// </summary>
@@ -116,7 +118,7 @@ namespace BotScaffold
                 return Args.MentionedChannels;
             }
         }
-
+        
         /// <summary>
         /// Creates a new command args object from the regex match, the message arguments and the
         /// config for the current bot and server/guild.

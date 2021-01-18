@@ -67,16 +67,35 @@ namespace BotScaffold
         /// Attempts to invoke this command given the current user string.
         /// </summary>
         /// <param name="args">The message context used to invoke this command attempt.</param>
-        /// <returns>A boolean indicating whether the attempt was successful.</returns>
-        public async Task<bool> AttemptAsync(MessageCreateEventArgs args, TConfig config)
+        /// <returns>A task for handling the command.</returns>
+        public async Task<CommandState> AttemptAsync(MessageCreateEventArgs args, TConfig config)
         {
-            Match m = Regex.Match(args.Message.Content, $"(?:{CommandString})\\s*{ParameterRegex}");
-            if (m.Success)
+            Match commandMatch = Regex.Match(args.Message.Content, $"^{config.Indicator}{CommandString}");
+            if (commandMatch.Success)
             {
-                await Callback(new CommandArgs<TConfig>(m, args, config));
-                return true;
+                if (ParameterRegex is null)
+                {
+                    await Callback(new CommandArgs<TConfig>(null, args, config));
+                    return CommandState.Handled;
+                }
+                else
+                {
+                    Match parameterMatch = Regex.Match(args.Message.Content, ParameterRegex);
+                    if (parameterMatch.Success)
+                    {
+                        await Callback(new CommandArgs<TConfig>(parameterMatch, args, config));
+                        return CommandState.Handled;
+                    }
+                    else
+                    {
+                        return CommandState.ParameterError;
+                    }
+                }
             }
-            else return false;
+            else
+            {
+                return CommandState.Unhandled;
+            }
         }
         /// <summary>
         /// Generates a hash code that can be used to quickly identify whether two commands are not

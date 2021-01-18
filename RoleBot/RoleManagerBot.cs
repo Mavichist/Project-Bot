@@ -39,22 +39,29 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("emoji role register", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emoji>:[\\w\\d-_]+:)`\\s+<@&(?<roleID>\\d+)>")]
+        [CommandAttribute("emoji role register", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d-_]+:)`\\s+<@&(?<roleID>\\d+)>")]
         private async Task Register(CommandArgs<RoleBotConfig> args)
         {
-            string emoji = args["emoji"];
-
-            if (!args.Config.EmojiRoles.TryGetValue(emoji, out ulong roleID))
+            string emojiName = args["emojiName"];
+            
+            if (emojiName != null)
             {
-                roleID = ulong.Parse(args["roleID"]);
-                args.Config.EmojiRoles.Add(emoji, roleID);
-                DiscordRole role = args.Guild.GetRole(roleID);
-                await args.Channel.SendMessageAsync($"{emoji} has been mapped to *{role.Name}*.");
+                if (!args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
+                {
+                    roleID = ulong.Parse(args["roleID"]);
+                    args.Config.EmojiRoles.Add(emojiName, roleID);
+                    DiscordRole role = args.Guild.GetRole(roleID);
+                    await args.Channel.SendMessageAsync($"{emojiName} has been mapped to *{role.Name}*.");
+                }
+                else
+                {
+                    DiscordRole role = args.Guild.GetRole(roleID);
+                    await args.Channel.SendMessageAsync($"{emojiName} is already mapped to *{role?.Name ?? "a role that no longer exists."}*");
+                }
             }
             else
             {
-                DiscordRole role = args.Guild.GetRole(roleID);
-                await args.Channel.SendMessageAsync($"{emoji} is already mapped to *{role?.Name ?? "a role that no longer exists."}*");
+                await args.Channel.SendMessageAsync($"The emoji does not exist.");
             }
         }
         /// <summary>
@@ -62,19 +69,20 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("emoji role deregister", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emoji>:[\\w\\d-_]+:)`\\s+<@&(?<roleID>\\d+)>")]
+        [CommandAttribute("emoji role deregister", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d-_]+:)`\\s+<@&(?<roleID>\\d+)>")]
         private async Task Deregister(CommandArgs<RoleBotConfig> args)
         {
-            string emoji = args["emoji"];
-            if (args.Config.EmojiRoles.TryGetValue(emoji, out ulong roleID))
+            string emojiName = args["emojiName"];
+            
+            if (args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
             {
-                args.Config.EmojiRoles.Remove(emoji);
+                args.Config.EmojiRoles.Remove(emojiName);
                 DiscordRole role = args.Guild.GetRole(roleID);
-                await args.Channel.SendMessageAsync($"*{role.Name}* is no longer associated with {emoji}");
+                await args.Channel.SendMessageAsync($"*{role.Name}* is no longer associated with {emojiName}");
             }
             else
             {
-                await args.Channel.SendMessageAsync($"No role is mapped to {emoji}");
+                await args.Channel.SendMessageAsync($"No role is mapped to {emojiName}");
             }
         }
         /// <summary>
@@ -86,6 +94,11 @@ namespace RoleBot
         private async Task CreateRolePost(CommandArgs<RoleBotConfig> args)
         {
             DiscordMessage message = await args.Channel.SendMessageAsync(FormatRolePost(args.Guild, args.Config));
+            foreach (var emojiRole in args.Config.EmojiRoles)
+            {
+                DiscordEmoji emoji = DiscordEmoji.FromName(Client, emojiRole.Key);
+                await message.CreateReactionAsync(emoji);
+            }
             args.Config.RolePostID = message.Id;
             args.Config.RolePostChannelID = args.Channel.Id;
         }
@@ -101,7 +114,16 @@ namespace RoleBot
             {
                 DiscordChannel channel = args.Guild.GetChannel(args.Config.RolePostChannelID);
                 DiscordMessage message = await channel?.GetMessageAsync(args.Config.RolePostID);
-                await message?.ModifyAsync(FormatRolePost(args.Guild, args.Config));
+                if (message != null)
+                {
+                    await message.ModifyAsync(FormatRolePost(args.Guild, args.Config));
+                    await message.DeleteAllReactionsAsync();
+                    foreach (var emojiRole in args.Config.EmojiRoles)
+                    {
+                        DiscordEmoji emoji = DiscordEmoji.FromName(Client, emojiRole.Key);
+                        await message.CreateReactionAsync(emoji);
+                    }
+                }
             }
         }
 
@@ -112,7 +134,7 @@ namespace RoleBot
         /// <returns>A task for handling the reaction.</returns>
         protected override async Task ReactionAdded(ReactionAddArgs<RoleBotConfig> args)
         {
-            if (args.ReactingToMe)
+            if (args.Message.Id == args.Config.RolePostID)
             {
                 string emojiName = args.Emoji.GetDiscordName();
                 if (args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
@@ -133,7 +155,7 @@ namespace RoleBot
         /// <returns>A task for handling the reaction.</returns>
         protected override async Task ReactionRemoved(ReactionRemoveArgs<RoleBotConfig> args)
         {
-            if (args.ReactingToMe)
+            if (args.Message.Id == args.Config.RolePostID)
             {
                 string emojiName = args.Emoji.GetDiscordName();
                 if (args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
@@ -147,7 +169,7 @@ namespace RoleBot
                 }
             }
         }
-        
+
         /// <summary>
         /// Creates a default config data structure for new servers.
         /// </summary>

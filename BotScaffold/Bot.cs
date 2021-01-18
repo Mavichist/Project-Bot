@@ -152,17 +152,20 @@ namespace BotScaffold
             {
                 // Get the command level so we can filter out commands this user can't access.
                 CommandLevel level = await GetCommandLevelAsync(args.Guild, args.Author.Id);
-                bool commandFound = false;
                 foreach (Command<TConfig> c in Commands)
                 {
                     // Only if the command is lower or equal to the user level do we attempt to run it.
                     if (c.CommandLevel <= level)
                     {
                         // If the regex matches and the command succeeds, we can skip the rest.
-                        if (await c.AttemptAsync(args, config))
+                        CommandState state = await c.AttemptAsync(args, config);
+                        if (state == CommandState.Handled)
                         {
-                            commandFound = true;
                             break;
+                        }
+                        else if (state == CommandState.ParameterError)
+                        {
+                            await args.Channel.SendMessageAsync($"Incorrectly formatted parameters. Should match `{c.ParameterRegex}`");
                         }
                     }
                 }
@@ -177,9 +180,12 @@ namespace BotScaffold
         /// <returns>A task to handle processing of the command.</returns>
         private async Task OnReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
         {
-            TConfig config = GetConfig(args.Guild);
-
-            await ReactionAdded(new ReactionAddArgs<TConfig>(args, config, args.Message.Author.Id == Details.ID));
+            // Bots shouldn't handle their own reactions.
+            if (args.User.Id != Details.ID)
+            {
+                TConfig config = GetConfig(args.Guild);
+                await ReactionAdded(new ReactionAddArgs<TConfig>(args, config));
+            }
         }
         /// <summary>
         /// When an emoji is removed from a post the bot will identify whether the relevant message
@@ -190,9 +196,12 @@ namespace BotScaffold
         /// <returns>A task to handle processing of the command.</returns>
         private async Task OnReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
         {
-            TConfig config = GetConfig(args.Guild);
-
-            await ReactionRemoved(new ReactionRemoveArgs<TConfig>(args, config, args.Message.Author.Id == Details.ID));
+            // Bots shouldn't handle their own reactions.
+            if (args.User.Id != Details.ID)
+            {
+                TConfig config = GetConfig(args.Guild);
+                await ReactionRemoved(new ReactionRemoveArgs<TConfig>(args, config));
+            }
         }
 
         /// <summary>
@@ -227,7 +236,7 @@ namespace BotScaffold
         /// Occurs when the bot connects using a discord client.
         /// </summary>
         /// <param name="client">The client representing the Discord API connection.</param>
-        protected virtual void OnConnected(DiscordClient client)
+        protected virtual void OnConnected()
         {
             Console.WriteLine("Connected.");
         }
@@ -277,7 +286,7 @@ namespace BotScaffold
                 Client.MessageReactionAdded += OnReactionAdded;
                 Client.MessageReactionRemoved += OnReactionRemoved;
 
-                OnConnected(Client);
+                OnConnected();
 
                 CancellationSource = new CancellationTokenSource();
                 await Task.Delay(-1, CancellationSource.Token);
@@ -314,13 +323,13 @@ namespace BotScaffold
                     TokenType = TokenType.Bot
                 });
 
-                await Client.ConnectAsync();
-
                 Client.MessageCreated += OnMessageCreated;
                 Client.MessageReactionAdded += OnReactionAdded;
                 Client.MessageReactionRemoved += OnReactionRemoved;
 
-                OnConnected(Client);
+                await Client.ConnectAsync();
+
+                OnConnected();
 
                 CancellationSource = new CancellationTokenSource();
                 await Task.Delay(-1, CancellationSource.Token);

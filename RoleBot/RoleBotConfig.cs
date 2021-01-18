@@ -11,6 +11,7 @@ namespace RoleBot
     {
         /// <summary>
         /// A dictionary describing the association between emojis and roles on this server.
+        /// Emoji names form the key of this dictionary (including the colons), while role IDs form the values.
         /// </summary>
         [JsonInclude]
         public Dictionary<string, ulong> EmojiRoles
