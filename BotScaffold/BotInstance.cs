@@ -84,14 +84,12 @@ namespace BotScaffold
 
                 CancellationSource = new CancellationTokenSource();
                 await Task.Delay(-1, CancellationSource.Token);
-
-                await Client.DisconnectAsync();
-
-                onShutdown();
             }
             catch (TaskCanceledException tce)
             {
-                
+                await Client.DisconnectAsync();
+
+                onShutdown();
             }
             finally
             {
@@ -171,20 +169,6 @@ namespace BotScaffold
                     BotConfig.Save(serverConfig.Value, Name, serverConfig.Key);
                 }
             }
-            /// <summary>
-            /// Retrieves the configuration for a specific guild.
-            /// </summary>
-            /// <param name="guild"></param>
-            /// <returns>The configuration data structure for this guild.</returns>
-            private TConfig GetConfig(DiscordGuild guild)
-            {
-                if (!ServerConfigs.TryGetValue(guild.Id, out TConfig config))
-                {
-                    config = CreateDefaultConfig();
-                    ServerConfigs.Add(guild.Id, config);
-                }
-                return config;
-            }
             
             /// <summary>
             /// Determines the level of commands the user is capable of executing.
@@ -194,7 +178,7 @@ namespace BotScaffold
             /// <returns>The command level the user can access.</returns>
             private async Task<CommandLevel> GetCommandLevelAsync(DiscordGuild guild, ulong userID)
             {
-                TConfig config = GetConfig(guild);
+                TConfig config = GetConfig(guild.Id);
                 DiscordMember member = await guild.GetMemberAsync(userID);
                 
                 // If the member is the owner of the server, they can execute any command.
@@ -230,7 +214,7 @@ namespace BotScaffold
             /// <returns>A task to handle processing of the command.</returns>
             private async Task OnMessageCreated(DiscordClient client, MessageCreateEventArgs args)
             {
-                TConfig config = GetConfig(args.Guild);
+                TConfig config = GetConfig(args.Guild.Id);
                 
                 // Check to see if the post starts with our indicator and the author wasn't a bot.
                 if (args.Message.Content.StartsWith(config.Indicator) && !args.Author.IsBot)
@@ -268,7 +252,7 @@ namespace BotScaffold
                 // Bots shouldn't handle their own reactions.
                 if (args.User.Id != Instance.Details.ID)
                 {
-                    TConfig config = GetConfig(args.Guild);
+                    TConfig config = GetConfig(args.Guild.Id);
                     await ReactionAdded(new ReactionAddArgs<TConfig>(args, config));
                 }
             }
@@ -284,11 +268,37 @@ namespace BotScaffold
                 // Bots shouldn't handle their own reactions.
                 if (args.User.Id != Instance.Details.ID)
                 {
-                    TConfig config = GetConfig(args.Guild);
+                    TConfig config = GetConfig(args.Guild.Id);
                     await ReactionRemoved(new ReactionRemoveArgs<TConfig>(args, config));
                 }
             }
 
+            /// <summary>
+            /// Retrieves the configuration for a specific guild.
+            /// </summary>
+            /// <param name="guild"></param>
+            /// <returns>The configuration data structure for this guild.</returns>
+            protected TConfig GetConfig(ulong guildID)
+            {
+                if (!ServerConfigs.TryGetValue(guildID, out TConfig config))
+                {
+                    config = CreateDefaultConfig();
+                    ServerConfigs.Add(guildID, config);
+                }
+                return config;
+            }
+            /// <summary>
+            /// Enumerates all of the guild IDs for which  this bot currently has configuration
+            /// objects.
+            /// </summary>
+            /// <returns>An enumerable collection of unsigned 64-bit integers.</returns>
+            protected IEnumerable<ulong> EnumerateGuildIDs()
+            {
+                foreach (var k in ServerConfigs)
+                {
+                    yield return k.Key;
+                }
+            }
             /// <summary>
             /// Occurs when the bot is first run.
             /// </summary>

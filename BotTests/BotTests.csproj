@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ProjectBot\ProjectBot.csproj" />
     <ProjectReference Include="..\RoleBot\RoleBot.csproj" />
+    <ProjectReference Include="..\RainbowRoleBot\RainbowRoleBot.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

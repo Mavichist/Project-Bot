@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotTests", "BotTests\BotTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoleBot", "RoleBot\RoleBot.csproj", "{6EDEE3A5-79DE-4CCD-ABD1-92F2B203EE1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RainbowRoleBot", "RainbowRoleBot\RainbowRoleBot.csproj", "{A166B934-BF86-4307-9A07-09E536C709CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,17 @@ Global
 		{6EDEE3A5-79DE-4CCD-ABD1-92F2B203EE1E}.Release|x64.Build.0 = Release|Any CPU
 		{6EDEE3A5-79DE-4CCD-ABD1-92F2B203EE1E}.Release|x86.ActiveCfg = Release|Any CPU
 		{6EDEE3A5-79DE-4CCD-ABD1-92F2B203EE1E}.Release|x86.Build.0 = Release|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Debug|x64.Build.0 = Debug|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Debug|x86.Build.0 = Debug|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Release|x64.ActiveCfg = Release|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Release|x64.Build.0 = Release|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Release|x86.ActiveCfg = Release|Any CPU
+		{A166B934-BF86-4307-9A07-09E536C709CB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

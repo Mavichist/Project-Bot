@@ -137,6 +137,7 @@ namespace RoleBot
             if (args.Message.Id == args.Config.RolePostID)
             {
                 string emojiName = args.Emoji.GetDiscordName();
+                
                 if (args.Config.EmojiRoles.TryGetValue(emojiName, out ulong roleID))
                 {
                     DiscordRole role = args.Guild.GetRole(roleID);

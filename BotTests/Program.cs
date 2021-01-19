@@ -2,6 +2,7 @@
 using BotScaffold;
 using ProjectBot;
 using RoleBot;
+using RainbowRoleBot;
 
 namespace BotTests
 {
@@ -24,10 +25,12 @@ namespace BotTests
             CoreBot coreBot = new CoreBot("CoreBot");
             ProjectManagerBot projBot = new ProjectManagerBot("ProjectBot");
             RoleManagerBot roleBot = new RoleManagerBot("RoleBot");
+            RainbowRoleManagerBot rainbowBot = new RainbowRoleManagerBot("RainbowBot");
 
             coreBot.AttachTo(instance);
             projBot.AttachTo(instance);
             roleBot.AttachTo(instance);
+            rainbowBot.AttachTo(instance);
 
             Task.WaitAll(instance.RunAsync());
 
