@@ -2,27 +2,27 @@
 using System.Text.Json.Serialization;
 using BotScaffold;
 
-namespace ProjectBot
+namespace HangoutBot
 {
     /// <summary>
     /// A simple class for modelling a single Discord server and keeping track of its projects.
     /// </summary>
-    public class ProjectBotConfig : BotConfig
+    public class HangoutBotConfig : BotConfig
     {
         /// <summary>
         /// A dictionary of projects identified by their names.
         /// </summary>
         [JsonInclude]
-        public Dictionary<string, Project> Projects
+        public Dictionary<string, Hangout> Hangouts
         {
             get;
             private set;
-        } = new Dictionary<string, Project>();
+        } = new Dictionary<string, Hangout>();
         /// <summary>
         /// An identifying number specifying which channel group project channels belong to.
         /// </summary>
         [JsonInclude]
-        public ulong ProjectCategoryID
+        public ulong HangoutCategoryID
         {
             get;
             set;
@@ -33,10 +33,10 @@ namespace ProjectBot
         /// channel ID.
         /// </summary>
         /// <param name="serverID">The identifying number for the Discord server.</param>
-        /// <param name="projectCategoryID">The identifying number for the project channel category.</param>
-        public ProjectBotConfig(char indicator, ulong projectCategoryID) : base(indicator)
+        /// <param name="hangoutCategoryID">The identifying number for the project channel category.</param>
+        public HangoutBotConfig(char indicator, ulong hangoutCategoryID) : base(indicator)
         {
-            ProjectCategoryID = projectCategoryID;
+            HangoutCategoryID = hangoutCategoryID;
         }
     }
 }

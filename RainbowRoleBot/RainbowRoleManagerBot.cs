@@ -72,10 +72,38 @@ namespace RainbowRoleBot
                 if (!args.Config.RainbowRoles.Contains(roleID))
                 {
                     args.Config.RainbowRoles.Add(roleID);
+                    await args.Channel.SendMessageAsync($"The **{role.Name}** role is now a rainbow role.");
                 }
                 else
                 {
                     await args.Channel.SendMessageAsync($"The **{role.Name}** role is already a rainbow role.");
+                }
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync("That role doesn't seem to exist.");
+            }
+        }
+        /// <summary>
+        /// A command for removing a role from this bot.
+        /// </summary>
+        /// <param name="args">The context for the message invoking the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
+        [CommandAttribute("rainbow role remove", CommandLevel = CommandLevel.Admin, ParameterRegex = "<@&(?<roleID>\\d+)>")]
+        private async Task RemoveRainbowRole(CommandArgs<RainbowRoleBotConfig> args)
+        {
+            ulong roleID = ulong.Parse(args["roleID"]);
+            DiscordRole role = args.Guild.GetRole(roleID);
+
+            if (role != null)
+            {
+                if (args.Config.RainbowRoles.Remove(roleID))
+                {
+                    await args.Channel.SendMessageAsync($"The **{role.Name}** role is no longer a rainbow role.");
+                }
+                else
+                {
+                    await args.Channel.SendMessageAsync($"The **{role.Name}** role isn't a rainbow role.");
                 }
             }
             else

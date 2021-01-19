@@ -1,11 +1,11 @@
 using System.Text.Json.Serialization;
 
-namespace ProjectBot
+namespace HangoutBot
 {
     /// <summary>
     /// A simple class for modelling a project, its properties and its members.
     /// </summary>
-    public class Project
+    public class Hangout
     {
         /// <summary>
         /// The name of the project.
@@ -29,15 +29,6 @@ namespace ProjectBot
         /// Each project has a curator role, identified by this number.
         /// </summary>
         [JsonInclude]
-        public ulong CuratorRoleID
-        {
-            get;
-            set;
-        }
-        /// <summary>
-        /// Each project has a member role, identified by this number.
-        /// </summary>
-        [JsonInclude]
         public ulong MemberRoleID
         {
             get;
@@ -45,17 +36,15 @@ namespace ProjectBot
         }
 
         /// <summary>
-        /// Creates a new project, storing information about names, channels and roles.
+        /// Creates a new hangout, storing information about names, channels and roles.
         /// </summary>
         /// <param name="name">The name of the project.</param>
         /// <param name="channelID">The channel identifying number.</param>
-        /// <param name="curatorRoleID">The curator role identifying number.</param>
         /// <param name="memberRoleID">The member role identifying number.</param>
-        public Project(string name, ulong channelID, ulong curatorRoleID, ulong memberRoleID)
+        public Hangout(string name, ulong channelID, ulong memberRoleID)
         {
             Name = name;
             ChannelID = channelID;
-            CuratorRoleID = curatorRoleID;
             MemberRoleID = memberRoleID;
         }
     }

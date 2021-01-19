@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using BotScaffold;
-using ProjectBot;
+using HangoutBot;
 using RoleBot;
 using RainbowRoleBot;
 
@@ -23,12 +23,12 @@ namespace BotTests
             BotInstance instance = new BotInstance(details);
             
             CoreBot coreBot = new CoreBot("CoreBot");
-            ProjectManagerBot projBot = new ProjectManagerBot("ProjectBot");
+            HangoutManagerBot hangoutBot = new HangoutManagerBot("HangoutBot");
             RoleManagerBot roleBot = new RoleManagerBot("RoleBot");
             RainbowRoleManagerBot rainbowBot = new RainbowRoleManagerBot("RainbowBot");
 
             coreBot.AttachTo(instance);
-            projBot.AttachTo(instance);
+            hangoutBot.AttachTo(instance);
             roleBot.AttachTo(instance);
             rainbowBot.AttachTo(instance);
 
