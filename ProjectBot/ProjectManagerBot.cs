@@ -23,7 +23,6 @@ namespace ProjectBot
         /// <summary>
         /// Defines the functionality for adding a project to this server's list.
         /// </summary>
-        /// <param name="match">The regex match for command parameters.</param>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project add", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
@@ -72,7 +71,6 @@ namespace ProjectBot
         /// <summary>
         /// Defines functionality for removing a project from this server's list.
         /// </summary>
-        /// <param name="match">The regex match for command parameters.</param>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project remove", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
@@ -103,7 +101,6 @@ namespace ProjectBot
         /// <summary>
         /// Defines a command for listing existing projects on this server.
         /// </summary>
-        /// <param name="match">The regex match for command parameters.</param>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project list", CommandLevel = CommandLevel.Unrestricted)]
@@ -121,7 +118,6 @@ namespace ProjectBot
         /// <summary>
         /// Defines a command for manually setting the project category channel.
         /// </summary>
-        /// <param name="match">The regex match for command parameters.</param>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("project set category", CommandLevel = CommandLevel.Admin, ParameterRegex = "<#(?<channelID>\\d+)>")]

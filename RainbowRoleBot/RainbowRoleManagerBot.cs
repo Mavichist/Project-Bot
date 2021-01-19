@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace RainbowRoleBot
 {
+    /// <summary>
+    /// A simple bot that periodically recolors a list of roles, forming a kind of rainbow effect.
+    /// </summary>
     public class RainbowRoleManagerBot : BotInstance.Bot<RainbowRoleBotConfig>
     {
         public static int ONE_SECOND = 1000;
@@ -15,11 +18,19 @@ namespace RainbowRoleBot
 
         private Timer colorChangeTimer;
 
+        /// <summary>
+        /// Creates a new rainbow role manager bot with the specified name.
+        /// </summary>
+        /// <param name="name">The name of the bot (used for config files).</param>
         public RainbowRoleManagerBot(string name) : base(name)
         {
 
         }
 
+        /// <summary>
+        /// An asynchronous method for changing the color of this bot's managed roles.
+        /// </summary>
+        /// <returns>A task representing the work to be done.</returns>
         private async Task ChangeColorsAsync()
         {
             Random r = new Random();
@@ -37,10 +48,19 @@ namespace RainbowRoleBot
                 }
             }
         }
+        /// <summary>
+        /// A wrapper method to be fed into the colorChangeTimer object.
+        /// </summary>
+        /// <param name="state">A state object for the start of each thread. Currently unused.</param>
         private void ChangeColors(object state)
         {
             ChangeColorsAsync().GetAwaiter().GetResult();
         } 
+        /// <summary>
+        /// A command for adding a role to this bot.
+        /// </summary>
+        /// <param name="args">The context for the message invoking the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("rainbow role add", CommandLevel = CommandLevel.Admin, ParameterRegex = "<@&(?<roleID>\\d+)>")]
         private async Task AddRainbowRole(CommandArgs<RainbowRoleBotConfig> args)
         {
@@ -64,10 +84,17 @@ namespace RainbowRoleBot
             }
         }
 
+        /// <summary>
+        /// Creates a default config object to suit this bot.
+        /// </summary>
+        /// <returns>The config object.</returns>
         protected override RainbowRoleBotConfig CreateDefaultConfig()
         {
             return new RainbowRoleBotConfig('!');
         }
+        /// <summary>
+        /// Fires when the bot first connects.
+        /// </summary>
         protected override void OnConnected()
         {
             base.OnConnected();

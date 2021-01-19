@@ -27,7 +27,6 @@ namespace BotScaffold
         /// <summary>
         /// A simple parameterless command for shutting down the bot.
         /// </summary>
-        /// <param name="match">The regex match for command parameters.</param>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("shutdown", CommandLevel = CommandLevel.Admin)]
