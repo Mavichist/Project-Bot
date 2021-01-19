@@ -305,7 +305,7 @@ namespace BotScaffold
             protected virtual void OnStartup()
             {
                 LoadConfig();
-                Console.WriteLine("Starting up...");
+                Console.WriteLine($"Starting {Name}...");
             }
             /// <summary>
             /// Occurs when the bot is shut down and the main worker thread ceases.
@@ -313,14 +313,14 @@ namespace BotScaffold
             protected virtual void OnShutdown()
             {
                 SaveConfig();
-                Console.WriteLine("Shutting down...");
+                Console.WriteLine($"Shutting down {Name}...");
             }
             /// <summary>
             /// Fires when the bot instance connects.
             /// </summary>
             protected virtual void OnConnected()
             {
-                Console.WriteLine("Connected.");
+                Console.WriteLine($"{Name} connected.");
             }
             /// <summary>
             /// Creates a default config data structure for new servers.

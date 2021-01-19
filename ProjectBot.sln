@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotTests", "BotTests\BotTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoleBot", "RoleBot\RoleBot.csproj", "{6EDEE3A5-79DE-4CCD-ABD1-92F2B203EE1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RainbowRoleBot", "RainbowRoleBot\RainbowRoleBot.csproj", "{A166B934-BF86-4307-9A07-09E536C709CB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HangoutBot", "HangoutBot\HangoutBot.csproj", "{F57FEADF-D2AE-4A4E-B9D7-1B244032AF3C}"
 EndProject
 Global
