@@ -57,9 +57,6 @@ In the above example, no `CommandLevel` is registered for any of the commands. C
 ### BotTests
 This project simply supplies an application entry-point, instantiates a bot for testing, then runs it.
 
-### ProjectBot
-This project contains a bot that handles the creation of projects, managing their associated channels, roles and permissions. It also contains the data structures and Json code necessary to save and load project lists for different servers.
-
 ## Walkthrough
 
 In order to work with this repo you will need a Discord bot application to work with. You can create one using the following link:
