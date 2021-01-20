@@ -12,6 +12,7 @@ namespace RoleBot
         /// <summary>
         /// A dictionary describing the association between emojis and roles on this server.
         /// Emoji names form the key of this dictionary (including the colons), while role IDs form the values.
+        /// Roles do not need to be managed by this bot in order to be registered with emojis.
         /// </summary>
         [JsonInclude]
         public Dictionary<string, ulong> EmojiRoles
@@ -19,6 +20,16 @@ namespace RoleBot
             get;
             private set;
         }
+        /// <summary>
+        /// A list of roles this bot manages.
+        /// Managed roles can be deleted en-masse.
+        /// </summary>
+        [JsonInclude]
+        public List<ulong> ManagedRoles
+        {
+            get;
+            private set;
+        } = new List<ulong>();
         /// <summary>
         /// The ID for the post whose reactions will be monitored and roles distributed for.
         /// </summary>

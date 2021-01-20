@@ -45,7 +45,7 @@ namespace HangoutBot
             // Create the hangout roles and channel if they don't exist, then set up permissions.
             if (!args.Config.Hangouts.ContainsKey(name))
             {
-                var memberRole = await args.Guild.CreateRoleAsync($"{name} Member");
+                var memberRole = await args.Guild.CreateRoleAsync($"{name} Hangout Member");
                 var channel = await args.Guild.CreateChannelAsync($"{name} Chat", ChannelType.Text, category);
 
                 // We need to set up the channel so that everyone else can't see it, but people with
