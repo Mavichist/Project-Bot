@@ -109,6 +109,15 @@ namespace HangoutBot
                 {
                     args.Config.HangoutCategoryID = categoryID;
                     await args.Channel.SendMessageAsync($"**{category.Name}** is now the hangout category.");
+
+                    foreach (var hangout in args.Config.Hangouts)
+                    {
+                        DiscordChannel channel = args.Guild.GetChannel(hangout.Value.ChannelID);
+                        await channel.ModifyAsync((e) =>
+                        {
+                            e.Parent = category;
+                        });
+                    }
                 }
                 else
                 {
