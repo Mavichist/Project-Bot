@@ -28,9 +28,8 @@ namespace HangoutBot
         private async Task AddHangout(CommandArgs<HangoutBotConfig> args)
         {
             string name = args["name"];
-            await args.Channel.SendMessageAsync($"Adding **{name}** to hangout list...");
 
-            // Create the server and hangout category, or retrieve them if they exist already.
+            // Create the server hangout category, or retrieve them if they exist already.
             DiscordChannel category;
             if (args.Config.HangoutCategoryID == 0)
             {
@@ -74,7 +73,6 @@ namespace HangoutBot
         private async Task RemoveHangout(CommandArgs<HangoutBotConfig> args)
         {
             string name = args["name"];
-            await args.Channel.SendMessageAsync($"Removing \"{name}\" from project list...");
 
             // If the project exists, retrieve and delete the associated roles and channels.
             if (args.Config.Hangouts.TryGetValue(name, out Hangout hangout))
