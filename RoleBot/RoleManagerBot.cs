@@ -241,13 +241,13 @@ namespace RoleBot
                 roles.Remove(roleID);
             }
 
-            StringBuilder builder = new StringBuilder();
-            builder.Append("The roles I do not manage on this server are as follows:\n");
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle("The roles I do not manage on this server are as follows:\n");
             foreach (var role in roles)
             {
-                builder.Append($">\t**{role.Value.Name}**\n");
+                builder.AddField($"**{role.Value.Name}**", $"{role.Value.CreationTimestamp}", true);
             }
-            await args.Channel.SendMessageAsync(builder.ToString());
+            await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
 
         /// <summary>

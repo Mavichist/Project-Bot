@@ -18,22 +18,13 @@ namespace BotScaffold
             get;
             private set;
         }
-        /// <summary>
-        /// Contains a list of role IDs that are considered "admins" by the bot.
-        /// </summary>
-        [JsonInclude]
-        public List<ulong> AdminRoleIDs
-        {
-            get;
-            set;
-        }
 
         /// <summary>
         /// Constructs an empty bot config object.
         /// </summary>
         public BotConfig()
         {
-            AdminRoleIDs = new List<ulong>();
+            
         }
         /// <summary>
         /// Constructs a new config object.

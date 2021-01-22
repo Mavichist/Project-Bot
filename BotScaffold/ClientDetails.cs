@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -24,6 +25,15 @@ namespace BotScaffold
             get;
             private set;
         }
+        /// <summary>
+        /// Contains a set of role IDs that are considered "admins" by the bot.
+        /// </summary>
+        [JsonInclude]
+        public Dictionary<ulong, List<ulong>> ServerAdminRoleIDs
+        {
+            get;
+            set;
+        } = new Dictionary<ulong, List<ulong>>();
 
         /// <summary>
         /// Constructs a new config object.
@@ -35,7 +45,36 @@ namespace BotScaffold
             ID = id;
             Token = token;
         }
-    
+
+        /// <summary>
+        /// Saves the client details to a file.
+        /// </summary>
+        /// <param name="fileName">The name of the file to save to.</param>
+        public void Save(string fileName)
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                WriteIndented = true
+            };
+            string json = JsonSerializer.Serialize<ClientDetails>(this, options);
+            File.WriteAllText(fileName, json);
+        }
+        /// <summary>
+        /// Retrieves a list of server admin roles.
+        /// Creates a new list if none are present.
+        /// </summary>
+        /// <param name="serverID">The server ID for the roles list.</param>
+        /// <returns>A list of role IDs.</returns>
+        public List<ulong> GetAdminRoleIDList(ulong serverID)
+        {
+            if (!ServerAdminRoleIDs.TryGetValue(serverID, out List<ulong> roleIDs))
+            {
+                roleIDs = new List<ulong>();
+                ServerAdminRoleIDs[serverID] = roleIDs;
+            }
+            return roleIDs;
+        }
+
         /// <summary>
         /// Loads client details from the specified file.
         /// </summary>

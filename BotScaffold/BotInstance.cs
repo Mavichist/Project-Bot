@@ -178,7 +178,6 @@ namespace BotScaffold
             /// <returns>The command level the user can access.</returns>
             private async Task<CommandLevel> GetCommandLevelAsync(DiscordGuild guild, ulong userID)
             {
-                TConfig config = GetConfig(guild.Id);
                 DiscordMember member = await guild.GetMemberAsync(userID);
                 
                 // If the member is the owner of the server, they can execute any command.
@@ -188,11 +187,13 @@ namespace BotScaffold
                 }
                 else
                 {
+                    List<ulong> adminRoleIDs = Instance.Details.GetAdminRoleIDList(guild.Id);
+
                     // We need to find an admin role in the member's role list for them to be considered
                     // an admin.
                     foreach (var role in member.Roles)
                     {
-                        if (config.AdminRoleIDs.Contains(role.Id))
+                        if (adminRoleIDs.Contains(role.Id))
                         {
                             return CommandLevel.Admin;
                         }
