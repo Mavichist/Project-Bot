@@ -63,23 +63,41 @@ namespace AwardBot
             return stats;
         }
         /// <summary>
-        /// Determines whether the user statistics qualify that user for the specified award.
+        /// Returns the number of points an emoji is worth.
+        /// Emojis not registered have a point value of 0.
         /// </summary>
-        /// <param name="userStats">The user statistics object.</param>
-        /// <param name="awardName">The name of the award.</param>
-        /// <returns>A boolean value indicating eligibility. Returns false if the award doesn't exist.</returns>
-        public bool EligibleFor(UserEmojiStats userStats, string awardName)
+        /// <param name="emojiName">The name of the emoji.</param>
+        /// <returns>The number of points the emoji is worth.</returns>
+        public int GetPoints(string emojiName)
+        {
+            if (EmojiPoints.TryGetValue(emojiName, out int points))
+            {
+                return points;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        /// <summary>
+        /// Determines if a user meets the requirements for an award.
+        /// </summary>
+        /// <param name="userID">The ID of the user to check.</param>
+        /// <param name="awardName">The name of the award to check requirements for.</param>
+        /// <returns>True if the user is eligible for the award, false if not.
+        /// Returns false if either the user or the award do not exist.</returns>
+        public bool HasAward(ulong userID, string awardName)
         {
             if (Awards.TryGetValue(awardName, out Award award))
             {
-                foreach (var pair in award.EmojiRequirements)
+                if (UserStats.TryGetValue(userID, out UserEmojiStats stats))
                 {
-                    if (userStats.GetCount(pair.Key) < pair.Value)
-                    {
-                        return false;
-                    }
+                    return stats.EligibleFor(award);
                 }
-                return true;
+                else
+                {
+                    return false;
+                }
             }
             else
             {

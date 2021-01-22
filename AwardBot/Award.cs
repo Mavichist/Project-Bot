@@ -28,34 +28,14 @@ namespace AwardBot
             get;
             private set;
         } = new Dictionary<string, int>();
-        /// <summary>
-        /// The minimum total number of points required to satisfy the conditions of this award.
-        /// </summary>
-        [JsonInclude]
-        public bool? MinThreshold
-        {
-            get;
-            set;
-        }
-        /// <summary>
-        /// The maximum total number of points required to satisfy the conditions of this award.
-        /// </summary>
-        [JsonInclude]
-        public bool? MaxThreshold
-        {
-            get;
-            set;
-        }
 
         /// <summary>
         /// Creates a new instance of an award using the specified description.
         /// </summary>
         /// <param name="description">The award description.</param>
-        public Award(string description, bool? minThreshold = null, bool? maxThreshold = null)
+        public Award(string description)
         {
             Description = description;
-            MinThreshold = minThreshold;
-            MaxThreshold = maxThreshold;
         }
     }
 }

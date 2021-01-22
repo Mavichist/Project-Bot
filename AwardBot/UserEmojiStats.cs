@@ -52,5 +52,22 @@ namespace AwardBot
                 return 0;
             }
         }
+        /// <summary>
+        /// Determines whether the user statistics qualify that user for the specified award.
+        /// </summary>
+        /// <param name="userStats">The user statistics object.</param>
+        /// <param name="awardName">The name of the award.</param>
+        /// <returns>A boolean value indicating eligibility. Returns false if the award doesn't exist.</returns>
+        public bool EligibleFor(Award award)
+        {
+            foreach (var pair in award.EmojiRequirements)
+            {
+                if (GetCount(pair.Key) < pair.Value)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
