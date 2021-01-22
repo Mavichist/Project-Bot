@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\ProjectBot\ProjectBot.csproj" />
     <ProjectReference Include="..\RoleBot\RoleBot.csproj" />
     <ProjectReference Include="..\HangoutBot\HangoutBot.csproj" />
     <ProjectReference Include="..\AwardBot\AwardBot.csproj" />
