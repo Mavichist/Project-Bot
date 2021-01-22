@@ -2,6 +2,7 @@
 using BotScaffold;
 using HangoutBot;
 using RoleBot;
+using AwardBot;
 
 namespace BotTests
 {
@@ -24,10 +25,12 @@ namespace BotTests
             CoreBot coreBot = new CoreBot("CoreBot");
             HangoutManagerBot hangoutBot = new HangoutManagerBot("HangoutBot");
             RoleManagerBot roleBot = new RoleManagerBot("RoleBot");
+            AwardManagerBot awardBot = new AwardManagerBot("AwardBot");
 
             coreBot.AttachTo(instance);
             hangoutBot.AttachTo(instance);
             roleBot.AttachTo(instance);
+            awardBot.AttachTo(instance);
 
             Task.WaitAll(instance.RunAsync());
 

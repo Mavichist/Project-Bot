@@ -6,6 +6,8 @@ The project bot and its related scaffolding are designed to handle the creation,
 
 By adding more projects to this solution, additional bots can be created independent of any others. Multiple bots can be grafted together on startup, meaning that you can run more than one set of commands and functionality through a single client if you want to.
 
+As it turns out; there is an extension to the DSharpPlus library that is designed to handle commands in a very similar way to this project. When I started the project, I had no idea that `DSharpPlus.CommandsNext` existed and I had never used it before. Our similar implementation of container-based commands contains other functionality, such as automatic per-server config loading/saving, so I am inclined to keep using it ahead of this extension library. The implementation is also useful as a learning tool for students who are interested in advanced C# topics, regular expressions and design patterns.
+
 ## Components
 
 ### BotScaffold

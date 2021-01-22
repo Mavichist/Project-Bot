@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoleBot", "RoleBot\RoleBot.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HangoutBot", "HangoutBot\HangoutBot.csproj", "{F57FEADF-D2AE-4A4E-B9D7-1B244032AF3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AwardBot", "AwardBot\AwardBot.csproj", "{099CA341-1F22-4892-92A9-9E2ECC283D57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,5 +86,17 @@ Global
 		{F57FEADF-D2AE-4A4E-B9D7-1B244032AF3C}.Release|x64.Build.0 = Release|Any CPU
 		{F57FEADF-D2AE-4A4E-B9D7-1B244032AF3C}.Release|x86.ActiveCfg = Release|Any CPU
 		{F57FEADF-D2AE-4A4E-B9D7-1B244032AF3C}.Release|x86.Build.0 = Release|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Debug|x64.Build.0 = Debug|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Debug|x86.Build.0 = Debug|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Release|x64.ActiveCfg = Release|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Release|x64.Build.0 = Release|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Release|x86.ActiveCfg = Release|Any CPU
+		{099CA341-1F22-4892-92A9-9E2ECC283D57}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

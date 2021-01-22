@@ -250,7 +250,7 @@ namespace BotScaffold
             private async Task OnReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
             {
                 // Bots shouldn't handle their own reactions.
-                if (args.User.Id != Instance.Details.ID)
+                if (!args.User.IsBot)
                 {
                     TConfig config = GetConfig(args.Guild.Id);
                     await ReactionAdded(new ReactionAddArgs<TConfig>(args, config));
@@ -266,7 +266,7 @@ namespace BotScaffold
             private async Task OnReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
             {
                 // Bots shouldn't handle their own reactions.
-                if (args.User.Id != Instance.Details.ID)
+                if (!args.User.IsBot)
                 {
                     TConfig config = GetConfig(args.Guild.Id);
                     await ReactionRemoved(new ReactionRemoveArgs<TConfig>(args, config));
