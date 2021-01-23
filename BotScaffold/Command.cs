@@ -140,8 +140,7 @@ namespace BotScaffold
 
             foreach (MethodInfo m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                CommandAttribute attr = m.GetCustomAttribute<CommandAttribute>();
-                if (attr != null)
+                foreach (CommandAttribute attr in m.GetCustomAttributes<CommandAttribute>())
                 {
                     CommandCallback<TConfig> callback = m.CreateDelegate<CommandCallback<TConfig>>(o);
                     commands.Add(new Command<TConfig>(attr.CommandString, attr.ParameterRegex, callback, attr.CommandLevel));

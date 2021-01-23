@@ -187,7 +187,7 @@ namespace BotScaffold
                 }
                 else
                 {
-                    List<ulong> adminRoleIDs = Instance.Details.GetAdminRoleIDList(guild.Id);
+                    HashSet<ulong> adminRoleIDs = Instance.Details.GetAdminRoleIDs(guild.Id);
 
                     // We need to find an admin role in the member's role list for them to be considered
                     // an admin.
