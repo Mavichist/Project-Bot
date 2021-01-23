@@ -1,4 +1,10 @@
 {
-    "ID":1234,
-    "Token":"abcd"
-}
+    "ID": 1234,
+    "Token": "abcd",
+    "ServerAdminRoleIDs": {
+      "9876": [
+        54321
+      ]
+    },
+    "AutoSaveInterval": 300000
+  }

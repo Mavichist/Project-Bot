@@ -82,6 +82,19 @@ namespace BotScaffold
         }
 
         /// <summary>
+        /// Initializes the client using information stored in the client details json file.
+        /// This method must be called before bots are attached to the instance.
+        /// </summary>
+        public void Init()
+        {
+            Details = ClientDetails.Load(CLIENT_DETAILS_FILE);
+            Client = new DiscordClient(new DiscordConfiguration()
+            {
+                Token = Details.Token,
+                TokenType = TokenType.Bot
+            });
+        }
+        /// <summary>
         /// Runs the bot as a new task that terminates when the bot is shut down.
         /// </summary>
         /// <returns>A task that can be stopped using the Stop() method.</returns>
@@ -89,13 +102,6 @@ namespace BotScaffold
         {
             try
             {
-                Details = ClientDetails.Load(CLIENT_DETAILS_FILE);
-                Client = new DiscordClient(new DiscordConfiguration()
-                {
-                    Token = Details.Token,
-                    TokenType = TokenType.Bot
-                });
-
                 onStartup();
                 onLoad();
 
@@ -402,7 +408,7 @@ namespace BotScaffold
                 Instance.onShutdown += OnShutdown;
                 Instance.onConnected += OnConnected;
                 Instance.onSave += OnSave;
-                Instance.onSave += OnLoad;
+                Instance.onLoad += OnLoad;
             }
             /// <summary>
             /// Detaches the bot from its instance.
@@ -419,7 +425,7 @@ namespace BotScaffold
                     Instance.onShutdown -= OnShutdown;
                     Instance.onConnected -= OnConnected;
                     Instance.onSave -= OnSave;
-                    Instance.onSave -= OnLoad;
+                    Instance.onLoad -= OnLoad;
 
                     Instance = null;
                 }

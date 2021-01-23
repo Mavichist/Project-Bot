@@ -20,6 +20,7 @@ namespace BotTests
         public static void Main(string[] args)
         {
             BotInstance instance = new BotInstance();
+            instance.Init();
             
             CoreBot coreBot = new CoreBot("CoreBot");
             HangoutManagerBot hangoutBot = new HangoutManagerBot("HangoutBot");
