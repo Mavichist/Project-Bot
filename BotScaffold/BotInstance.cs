@@ -11,12 +11,19 @@ namespace BotScaffold
     public delegate void BotStartupCallback();
     public delegate void BotShutdownCallback();
     public delegate void BotConnectedCallback();
+    public delegate void BotSaveCallback();
+    public delegate void BotLoadCallback();
 
     /// <summary>
     /// An instance that runs several bots (really bot extensions) at once.
     /// </summary>
     public class BotInstance
     {
+        /// <summary>
+        /// Defines the location of the client details json file.
+        /// </summary>
+        public readonly static string CLIENT_DETAILS_FILE = "ClientDetails.json";
+
         /// <summary>
         /// The client ID and token for interacting with the Discord API.
         /// </summary>
@@ -53,19 +60,25 @@ namespace BotScaffold
         /// Fires when the discord client connects for the first time.
         /// </summary>
         private BotConnectedCallback onConnected;
+        /// <summary>
+        /// Fires when the bot instance attempts to save data.
+        /// </summary>
+        private BotSaveCallback onSave;
+        /// <summary>
+        /// Fires when the bot instance attempts to load data.
+        /// </summary>
+        private BotLoadCallback onLoad;
+        /// <summary>
+        /// Periodically saves config and client
+        /// </summary>
+        private Timer autoSaveTimer;
 
         /// <summary>
         /// Creates a new bot instance that can have bot implementations attached to it.
         /// </summary>
-        /// <param name="details">The client ID and token with which to interact with the API.</param>
-        public BotInstance(ClientDetails details)
+        public BotInstance()
         {
-            Details = details;
-            Client = new DiscordClient(new DiscordConfiguration()
-            {
-                Token = Details.Token,
-                TokenType = TokenType.Bot
-            });
+            
         }
 
         /// <summary>
@@ -76,11 +89,21 @@ namespace BotScaffold
         {
             try
             {
+                Details = ClientDetails.Load(CLIENT_DETAILS_FILE);
+                Client = new DiscordClient(new DiscordConfiguration()
+                {
+                    Token = Details.Token,
+                    TokenType = TokenType.Bot
+                });
+
                 onStartup();
+                onLoad();
 
                 await Client.ConnectAsync();
 
                 onConnected();
+
+                autoSaveTimer = new Timer((o) => { SaveAll(); }, null, Details.AutoSaveInterval, Details.AutoSaveInterval);
 
                 CancellationSource = new CancellationTokenSource();
                 await Task.Delay(-1, CancellationSource.Token);
@@ -89,7 +112,11 @@ namespace BotScaffold
             {
                 await Client.DisconnectAsync();
 
+                await autoSaveTimer.DisposeAsync();
+                autoSaveTimer = null;
+
                 onShutdown();
+                SaveAll();
             }
             finally
             {
@@ -102,6 +129,14 @@ namespace BotScaffold
         public void Stop()
         {
             CancellationSource.Cancel();
+        }
+        /// <summary>
+        /// Saves all config files for all attached bots, as well as client details.
+        /// </summary>
+        public void SaveAll()
+        {
+            Details.Save(CLIENT_DETAILS_FILE);
+            onSave();
         }
 
         /// <summary>
@@ -150,24 +185,6 @@ namespace BotScaffold
             {
                 Name = name;
                 Commands = Command<TConfig>.GetCommands<TConfig>(this);
-            }
-
-            /// <summary>
-            /// Loads the config file associated with this bot.
-            /// </summary>
-            private void LoadConfig()
-            {
-                ServerConfigs = BotConfig.LoadAll<TConfig>(Name);
-            }
-            /// <summary>
-            /// Saves the bot's config data structure to the config folder.
-            /// </summary>
-            private void SaveConfig()
-            {
-                foreach (var serverConfig in ServerConfigs)
-                {
-                    BotConfig.Save(serverConfig.Value, Name, serverConfig.Key);
-                }
             }
             
             /// <summary>
@@ -301,11 +318,29 @@ namespace BotScaffold
                 }
             }
             /// <summary>
+            /// Saves the bot's config data structure to the config folder.
+            /// </summary>
+            protected virtual void OnSave()
+            {
+                Console.WriteLine($"Saving config for {Name}...");
+                foreach (var serverConfig in ServerConfigs)
+                {
+                    BotConfig.Save(serverConfig.Value, Name, serverConfig.Key);
+                }
+            }
+            /// <summary>
+            /// Loads the config file associated with this bot.
+            /// </summary>
+            protected virtual void OnLoad()
+            {
+                Console.WriteLine($"Loading config for {Name}...");
+                ServerConfigs = BotConfig.LoadAll<TConfig>(Name);
+            }
+            /// <summary>
             /// Occurs when the bot is first run.
             /// </summary>
             protected virtual void OnStartup()
             {
-                LoadConfig();
                 Console.WriteLine($"Starting {Name}...");
             }
             /// <summary>
@@ -313,7 +348,6 @@ namespace BotScaffold
             /// </summary>
             protected virtual void OnShutdown()
             {
-                SaveConfig();
                 Console.WriteLine($"Shutting down {Name}...");
             }
             /// <summary>
@@ -367,6 +401,8 @@ namespace BotScaffold
                 Instance.onStartup += OnStartup;
                 Instance.onShutdown += OnShutdown;
                 Instance.onConnected += OnConnected;
+                Instance.onSave += OnSave;
+                Instance.onSave += OnLoad;
             }
             /// <summary>
             /// Detaches the bot from its instance.
@@ -382,6 +418,8 @@ namespace BotScaffold
                     Instance.onStartup -= OnStartup;
                     Instance.onShutdown -= OnShutdown;
                     Instance.onConnected -= OnConnected;
+                    Instance.onSave -= OnSave;
+                    Instance.onSave -= OnLoad;
 
                     Instance = null;
                 }

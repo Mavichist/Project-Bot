@@ -34,16 +34,27 @@ namespace BotScaffold
             get;
             set;
         } = new Dictionary<ulong, HashSet<ulong>>();
+        /// <summary>
+        /// Defines the interval, in milliseconds, between automatic saving of config files.
+        /// </summary>
+        [JsonInclude]
+        public int AutoSaveInterval
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Constructs a new config object.
         /// </summary>
         /// <param name="id">The bot client ID.</param>
         /// <param name="token">The token for interacting with the Discord API.</param>
-        public ClientDetails(ulong id, string token)
+        /// <param name="autoSaveInterval">The number of milliseconds between automatic saves.</param>
+        public ClientDetails(ulong id, string token, int autoSaveInterval = 600000)
         {
             ID = id;
             Token = token;
+            AutoSaveInterval = autoSaveInterval;
         }
 
         /// <summary>

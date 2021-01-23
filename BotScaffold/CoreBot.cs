@@ -31,7 +31,7 @@ namespace BotScaffold
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("shutdown", CommandLevel = CommandLevel.Admin)]
+        [CommandAttribute("shutdown", CommandLevel = CommandLevel.Owner)]
         protected async Task Shutdown(CommandArgs<BotConfig> args)
         {
             await args.Channel.SendMessageAsync("Shutting down...");
@@ -42,7 +42,7 @@ namespace BotScaffold
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("register admin role", CommandLevel = CommandLevel.Admin, ParameterRegex = "<@&(?<roleID>\\d+)>")]
+        [CommandAttribute("register admin role", CommandLevel = CommandLevel.Owner, ParameterRegex = "<@&(?<roleID>\\d+)>")]
         protected async Task RegisterAdminRole(CommandArgs<BotConfig> args)
         {
             ulong roleID = ulong.Parse(args["roleID"]);
@@ -73,7 +73,7 @@ namespace BotScaffold
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("deregister admin role", CommandLevel = CommandLevel.Admin, ParameterRegex = "<@&(?<roleID>\\d+)")]
+        [CommandAttribute("deregister admin role", CommandLevel = CommandLevel.Owner, ParameterRegex = "<@&(?<roleID>\\d+)")]
         protected async Task DeregisterAdminRole(CommandArgs<BotConfig> args)
         {
             ulong roleID = ulong.Parse(args["roleID"]);
@@ -104,6 +104,12 @@ namespace BotScaffold
                     await args.Channel.SendMessageAsync($"The role doesn't seem to exist and it's not registered as an admin. Havin' a giggle?");
                 }
             }
+        }
+        [CommandAttribute("save all", CommandLevel = CommandLevel.Admin)]
+        protected async Task SaveAll(CommandArgs<BotConfig> args)
+        {
+            Instance.SaveAll();
+            await args.Channel.SendMessageAsync("Saved all config.");
         }
     }
 }

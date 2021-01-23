@@ -12,8 +12,6 @@ namespace BotTests
     /// </summary>
     public class Program
     {
-        public readonly static string CLIENT_DETAILS_FILE = "ClientDetails.json";
-
         /// <summary>
         /// Serves as the main entrypoint for the program.
         /// Launches the bot and then hangs until the bot is shut down.
@@ -21,8 +19,7 @@ namespace BotTests
         /// <param name="args">Command-line arguments supplied to the program.</param>
         public static void Main(string[] args)
         {
-            ClientDetails details = ClientDetails.Load(CLIENT_DETAILS_FILE);
-            BotInstance instance = new BotInstance(details);
+            BotInstance instance = new BotInstance();
             
             CoreBot coreBot = new CoreBot("CoreBot");
             HangoutManagerBot hangoutBot = new HangoutManagerBot("HangoutBot");
@@ -35,8 +32,6 @@ namespace BotTests
             awardBot.AttachTo(instance);
 
             Task.WaitAll(instance.RunAsync());
-
-            details.Save(CLIENT_DETAILS_FILE);
 
             System.Console.WriteLine("Finished.");
         }
