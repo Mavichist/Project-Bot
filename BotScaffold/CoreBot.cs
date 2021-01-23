@@ -68,5 +68,42 @@ namespace BotScaffold
                 await args.Channel.SendMessageAsync("That role doesn't seem to exist.");
             }
         }
+        /// <summary>
+        /// Deregisters a role as an administrator role so it can no longer use admin commands.
+        /// </summary>
+        /// <param name="args">The context for the message invoking the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
+        [CommandAttribute("deregister admin role", CommandLevel = CommandLevel.Owner, ParameterRegex = "<@&(?<roleID>\\d+)")]
+        protected async Task DeregisterAdminRole(CommandArgs<BotConfig> args)
+        {
+            ulong roleID = ulong.Parse(args["roleID"]);
+
+            DiscordRole role = args.Guild.GetRole(roleID);
+            
+            HashSet<ulong> adminRoleIDs = Instance.Details.GetAdminRoleIDs(args.Guild.Id);
+
+            if (role != null)
+            {
+                if (adminRoleIDs.Remove(roleID))
+                {
+                    await args.Channel.SendMessageAsync($"The **{role.Name}** role now has no administrative privileges.");
+                }
+                else
+                {
+                    await args.Channel.SendMessageAsync($"The **{role.Name}** role did not have administrative privileges.");
+                }
+            }
+            else
+            {
+                if (adminRoleIDs.Remove(roleID))
+                {
+                    await args.Channel.SendMessageAsync($"The role doesn't seem to exist but is still registered as admin. I'll deregister it.");
+                }
+                else
+                {
+                    await args.Channel.SendMessageAsync($"The role doesn't seem to exist and it's not registered as an admin. Havin' a giggle?");
+                }
+            }
+        }
     }
 }
