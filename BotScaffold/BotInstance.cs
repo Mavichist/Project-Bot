@@ -375,7 +375,7 @@ namespace BotScaffold
             /// <returns>A task for handling the reaction.</returns>
             protected virtual async Task ReactionRemoved(ReactionRemoveArgs<TConfig> args)
             {
-
+                
             }
             /// <summary>
             /// Called when one of this bot's posts has a reaction added.

@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BotScaffold;
 using DSharpPlus.Entities;
+using System.Text.RegularExpressions;
 
 namespace AwardBot
 {
@@ -10,6 +12,12 @@ namespace AwardBot
     /// </summary>
     public class AwardManagerBot : BotInstance.Bot<AwardBotConfig>
     {
+        public Dictionary<string, AbilitySupplier> AbilitySuppliers
+        {
+            get;
+            private set;
+        } = new Dictionary<string, AbilitySupplier>();
+
         /// <summary>
         /// Creates a new instance of an award manager bot, with the specified name.
         /// </summary>
@@ -259,6 +267,37 @@ namespace AwardBot
             }
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
+        }
+        [CommandAttribute("invoke", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<supplier>\\w+)\\s+(?<ability>\\w+)\\s+(?<args>[\\w\\W]*)$")]
+        private async Task InvokeAbility(CommandArgs<AwardBotConfig> args)
+        {
+            string supplierName = args["supplier"];
+            string abilityName = args["ability"];
+            string invocationArgs = args["args"];
+
+            if (AbilitySuppliers.TryGetValue(supplierName, out AbilitySupplier supplier))
+            {
+                if (supplier.Abilities.TryGetValue(abilityName, out Ability ability))
+                {
+                    Match match = Regex.Match(invocationArgs, ability.ParameterRegex);
+                    if (match.Success)
+                    {
+                        ability.Callback(new AbilityArgs(match, args));
+                    }
+                    else
+                    {
+                        await args.Channel.SendMessageAsync($"Arguments for this ability should match `{ability.ParameterRegex}`.");
+                    }
+                }
+                else
+                {
+                    await args.Channel.SendMessageAsync($"The **{supplierName}** ability group has no ability called **{abilityName}**.");
+                }
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync($"The **{supplierName}** ability group does not exist.");
+            }
         }
 
         /// <summary>
