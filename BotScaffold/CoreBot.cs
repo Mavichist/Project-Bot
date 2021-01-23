@@ -42,7 +42,7 @@ namespace BotScaffold
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("register admin role", CommandLevel = CommandLevel.Owner, ParameterRegex = "<@&(?<roleID>\\d+)>")]
+        [CommandAttribute("register admin role", CommandLevel = CommandLevel.Admin, ParameterRegex = "<@&(?<roleID>\\d+)>")]
         protected async Task RegisterAdminRole(CommandArgs<BotConfig> args)
         {
             ulong roleID = ulong.Parse(args["roleID"]);
@@ -73,7 +73,7 @@ namespace BotScaffold
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("deregister admin role", CommandLevel = CommandLevel.Owner, ParameterRegex = "<@&(?<roleID>\\d+)")]
+        [CommandAttribute("deregister admin role", CommandLevel = CommandLevel.Admin, ParameterRegex = "<@&(?<roleID>\\d+)")]
         protected async Task DeregisterAdminRole(CommandArgs<BotConfig> args)
         {
             ulong roleID = ulong.Parse(args["roleID"]);
@@ -90,14 +90,14 @@ namespace BotScaffold
                 }
                 else
                 {
-                    await args.Channel.SendMessageAsync($"The **{role.Name}** role did not have administrative privileges.");
+                    await args.Channel.SendMessageAsync($"The **{role.Name}** role isn't administrative.");
                 }
             }
             else
             {
                 if (adminRoleIDs.Remove(roleID))
                 {
-                    await args.Channel.SendMessageAsync($"The role doesn't seem to exist but is still registered as admin. I'll deregister it.");
+                    await args.Channel.SendMessageAsync($"The role doesn't seem to exist but is still registered as admin. I've deregistered it.");
                 }
                 else
                 {
