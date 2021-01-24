@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BotScaffold;
-using DSharpPlus.Entities;
 
 namespace RPGBot
 {
@@ -24,7 +21,7 @@ namespace RPGBot
 
         private void Parse(string settings)
         {
-            
+
         }
 
         public async Task Invoke(CommandArgs<RPGBotConfig> args, string mantra)

@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using BotScaffold;
 using DSharpPlus.Entities;
-using System.Text.RegularExpressions;
 
 namespace RPGBot
 {
