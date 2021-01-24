@@ -2,12 +2,12 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using BotScaffold;
 
-namespace AwardBot
+namespace RPGBot
 {
     /// <summary>
     /// Represents a configuration for the AwardManagerBot.
     /// </summary>
-    public class AwardBotConfig : BotConfig
+    public class RPGBotConfig : BotConfig
     {
         /// <summary>
         /// A set of emoji names and their associated point values.
@@ -22,11 +22,11 @@ namespace AwardBot
         /// A set of awards currently registered with the bot.
         /// </summary>
         [JsonInclude]
-        public Dictionary<string, Award> Awards
+        public Dictionary<string, Title> Titles
         {
             get;
             private set;
-        } = new Dictionary<string, Award>();
+        } = new Dictionary<string, Title>();
         /// <summary>
         /// A set of user statistics for all members of the current server.
         /// </summary>
@@ -37,13 +37,22 @@ namespace AwardBot
             get;
             private set;
         } = new Dictionary<ulong, UserEmojiStats>();
+        /// <summary>
+        /// A set of abilities registered to this server.
+        /// </summary>
+        [JsonInclude]
+        public Dictionary<string, Ability> Abilities
+        {
+            get;
+            private set;
+        } = new Dictionary<string, Ability>();
 
         /// <summary>
         /// Instantiates a new instance of an award bot config.
         /// </summary>
         /// <param name="indicator">The character each command must start with.</param>
         /// <returns></returns>
-        public AwardBotConfig(char indicator) : base(indicator)
+        public RPGBotConfig(char indicator) : base(indicator)
         {
 
         }
@@ -80,15 +89,15 @@ namespace AwardBot
             }
         }
         /// <summary>
-        /// Determines if a user meets the requirements for an award.
+        /// Determines if a user meets the requirements for a title.
         /// </summary>
         /// <param name="userID">The ID of the user to check.</param>
-        /// <param name="awardName">The name of the award to check requirements for.</param>
-        /// <returns>True if the user is eligible for the award, false if not.
-        /// Returns false if either the user or the award do not exist.</returns>
-        public bool HasAward(ulong userID, string awardName)
+        /// <param name="titleName">The name of the title to check requirements for.</param>
+        /// <returns>True if the user is eligible for the title, false if not.
+        /// Returns false if either the user or the title do not exist.</returns>
+        public bool HasTitle(ulong userID, string titleName)
         {
-            if (Awards.TryGetValue(awardName, out Award award))
+            if (Titles.TryGetValue(titleName, out Title award))
             {
                 if (UserStats.TryGetValue(userID, out UserEmojiStats stats))
                 {
@@ -102,6 +111,29 @@ namespace AwardBot
             else
             {
                 return false;
+            }
+        }
+        /// <summary>
+        /// Retrieves the total points for a user.
+        /// </summary>
+        /// <param name="userID">The ID for the user.</param>
+        /// <returns>An integer denoting the total number of points the user has.</returns>
+        public int GetTotalPoints(ulong userID)
+        {
+            if (UserStats.TryGetValue(userID, out UserEmojiStats stats))
+            {
+                int total = 0;
+
+                foreach (var emoji in stats.EmojiCounts)
+                {
+                    total += GetPoints(emoji.Key) * emoji.Value;
+                }
+
+                return total;
+            }
+            else
+            {
+                return 0;
             }
         }
     }

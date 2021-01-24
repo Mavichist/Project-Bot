@@ -5,24 +5,18 @@ using BotScaffold;
 using DSharpPlus.Entities;
 using System.Text.RegularExpressions;
 
-namespace AwardBot
+namespace RPGBot
 {
     /// <summary>
     /// Represents a bot for handling point-based awards, based on user reactions.
     /// </summary>
-    public class AwardManagerBot : BotInstance.Bot<AwardBotConfig>
+    public class RPGManagerBot : BotInstance.Bot<RPGBotConfig>
     {
-        public Dictionary<string, AbilitySupplier> AbilitySuppliers
-        {
-            get;
-            private set;
-        } = new Dictionary<string, AbilitySupplier>();
-
         /// <summary>
         /// Creates a new instance of an award manager bot, with the specified name.
         /// </summary>
         /// <param name="name">The name of this bot (used for loading config).</param>
-        public AwardManagerBot(string name) : base(name)
+        public RPGManagerBot(string name) : base(name)
         {
 
         }
@@ -32,8 +26,8 @@ namespace AwardBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("set emoji points", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d-_]+:)`\\s+(?<points>-?\\d+)")]
-        private async Task SetEmojiPoints(CommandArgs<AwardBotConfig> args)
+        [CommandAttribute("set emoji points", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d\\-_]+:)`\\s+(?<points>-?\\d+)")]
+        private async Task SetEmojiPoints(CommandArgs<RPGBotConfig> args)
         {
             string emojiName = args["emojiName"];
             int points = int.Parse(args["points"]);
@@ -72,7 +66,7 @@ namespace AwardBot
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("remove emoji points", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d-_]+:)`")]
-        private async Task RemoveEmojiPoints(CommandArgs<AwardBotConfig> args)
+        private async Task RemoveEmojiPoints(CommandArgs<RPGBotConfig> args)
         {
             string emojiName = args["emojiName"];
             
@@ -110,46 +104,46 @@ namespace AwardBot
             }
         }
         /// <summary>
-        /// A command for creating an award.
+        /// A command for creating a title.
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("create award", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"\\s+\"(?<description>[ -~]+)\"")]
-        private async Task CreateAward(CommandArgs<AwardBotConfig> args)
+        [CommandAttribute("create title", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"\\s+\"(?<description>[ -~]+)\"")]
+        private async Task CreateTitle(CommandArgs<RPGBotConfig> args)
         {
             string name = args["name"];
             string description = args["description"];
 
-            args.Config.Awards[name] = new Award(description);
+            args.Config.Titles[name] = new Title(description);
 
-            await args.Channel.SendMessageAsync($"The **{name}** award has been created.");
+            await args.Channel.SendMessageAsync($"The **{name}** title has been created.");
         }
         /// <summary>
-        /// A command for removing awards.
+        /// A command for removing titles.
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("remove award", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
-        private async Task RemoveAward(CommandArgs<AwardBotConfig> args)
+        [CommandAttribute("remove title", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
+        private async Task RemoveTitle(CommandArgs<RPGBotConfig> args)
         {
             string name = args["name"];
 
-            if (args.Config.Awards.Remove(name))
+            if (args.Config.Titles.Remove(name))
             {
-                await args.Channel.SendMessageAsync($"The **{name}** award has been removed.");
+                await args.Channel.SendMessageAsync($"The **{name}** title has been removed.");
             }
             else
             {
-                await args.Channel.SendMessageAsync($"The **{name}** award does not exist.");
+                await args.Channel.SendMessageAsync($"The **{name}** title does not exist.");
             }
         }
         /// <summary>
-        /// A command for setting the emoji requirements for an award.
+        /// A command for setting the emoji requirements for a title.
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("set award emoji requirement", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"\\s+`(?<emojiName>:[\\w\\d-_]+:)`\\s+(?<threshold>\\d+)")]
-        private async Task SetAwardEmojiRequirement(CommandArgs<AwardBotConfig> args)
+        [CommandAttribute("set title emoji requirement", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"\\s+`(?<emojiName>:[\\w\\d-_]+:)`\\s+(?<threshold>\\d+)")]
+        private async Task SetTitleEmojiRequirement(CommandArgs<RPGBotConfig> args)
         {
             string name = args["name"];
             string emojiName = args["emojiName"];
@@ -157,28 +151,28 @@ namespace AwardBot
 
             if (args.Config.EmojiPoints.ContainsKey(emojiName))
             {
-                if (args.Config.Awards.TryGetValue(name, out Award award))
+                if (args.Config.Titles.TryGetValue(name, out Title title))
                 {
-                    award.EmojiRequirements[emojiName] = threshold;
+                    title.EmojiRequirements[emojiName] = threshold;
 
                     DiscordEmoji emoji = DiscordEmoji.FromName(Instance.Client, emojiName);
                     if (emoji.RequiresColons)
                     {
-                        await args.Channel.SendMessageAsync($"The **{name}** award now requires **{threshold}x** <{emojiName}{emoji.Id}>.");
+                        await args.Channel.SendMessageAsync($"The **{name}** title now requires **{threshold}x** <{emojiName}{emoji.Id}>.");
                     }
                     else
                     {
-                        await args.Channel.SendMessageAsync($"The **{name}** award now requires **{threshold}x** {emojiName}.");
+                        await args.Channel.SendMessageAsync($"The **{name}** title now requires **{threshold}x** {emojiName}.");
                     }
                 }
                 else
                 {
-                    await args.Channel.SendMessageAsync($"The **{name}** award does not exist.");
+                    await args.Channel.SendMessageAsync($"The **{name}** title does not exist.");
                 }
             }
             else
             {
-                await args.Channel.SendMessageAsync("I don't track that emoji yet, so I can't use it for awards.");
+                await args.Channel.SendMessageAsync("I don't track that emoji yet, so I can't use it for titles.");
             }
         }
         /// <summary>
@@ -187,7 +181,7 @@ namespace AwardBot
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("show my stats", CommandLevel = CommandLevel.Unrestricted)]
-        private async Task ShowStats(CommandArgs<AwardBotConfig> args)
+        private async Task ShowStats(CommandArgs<RPGBotConfig> args)
         {
             UserEmojiStats stats = args.Config.GetStats(args.Author.Id);
             long totalPoints = 0;
@@ -225,78 +219,104 @@ namespace AwardBot
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
         /// <summary>
-        /// Shows available awards if the user is eligible for them.
+        /// Shows available titles if the user is eligible for them.
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("show my awards", CommandLevel = CommandLevel.Unrestricted)]
-        private async Task ShowMyAwards(CommandArgs<AwardBotConfig> args)
+        [CommandAttribute("show my title", CommandLevel = CommandLevel.Unrestricted)]
+        private async Task ShowMyTitles(CommandArgs<RPGBotConfig> args)
         {
             DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
             UserEmojiStats stats = args.Config.GetStats(member.Id);
 
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"Awards for **{member.DisplayName}**:");
+            builder.WithTitle($"Titles for **{member.DisplayName}**:");
             builder.WithThumbnail(member.AvatarUrl);
             builder.WithColor(member.Color);
 
-            foreach (var awards in args.Config.Awards)
+            foreach (var title in args.Config.Titles)
             {
-                if (stats.EligibleFor(awards.Value))
+                if (stats.EligibleFor(title.Value))
                 {
-                    builder.AddField($"**{awards.Key}**", $"{awards.Value.Description}", true);
+                    builder.AddField($"**{title.Key}**", $"{title.Value.Description}", true);
                 }
             }
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
         /// <summary>
-        /// Shows available awards.
+        /// Shows available titles.
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("show all awards", CommandLevel = CommandLevel.Unrestricted)]
-        private async Task ShowAllAwards(CommandArgs<AwardBotConfig> args)
+        [CommandAttribute("show all titles", CommandLevel = CommandLevel.Unrestricted)]
+        private async Task ShowAllTitles(CommandArgs<RPGBotConfig> args)
         {
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"All available awards:");
+            builder.WithTitle($"All available titles:");
 
-            foreach (var awards in args.Config.Awards)
+            foreach (var title in args.Config.Titles)
             {
-                builder.AddField($"**{awards.Key}**", $"{awards.Value.Description}", true);
+                builder.AddField($"**{title.Key}**", $"{title.Value.Description}", true);
             }
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
-        [CommandAttribute("invoke", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<supplier>\\w+)\\s+(?<ability>\\w+)\\s+(?<args>[\\w\\W]*)$")]
-        private async Task InvokeAbility(CommandArgs<AwardBotConfig> args)
+        /// <summary>
+        /// Invokes an ability with the given name.
+        /// </summary>
+        /// <param name="args">The context for the message invoking the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
+        [CommandAttribute("invoke", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<name>[a-zA-Z]+)\\s*(?<mantra>[\\w\\W]*)$")]
+        private async Task InvokeAbility(CommandArgs<RPGBotConfig> args)
         {
-            string supplierName = args["supplier"];
-            string abilityName = args["ability"];
-            string invocationArgs = args["args"];
+            string name = args["name"];
+            string mantra = args["mantra"];
 
-            if (AbilitySuppliers.TryGetValue(supplierName, out AbilitySupplier supplier))
+            if (args.Config.Abilities.TryGetValue(name, out Ability ability))
             {
-                if (supplier.Abilities.TryGetValue(abilityName, out Ability ability))
-                {
-                    Match match = Regex.Match(invocationArgs, ability.ParameterRegex);
-                    if (match.Success)
-                    {
-                        ability.Callback(new AbilityArgs(match, args));
-                    }
-                    else
-                    {
-                        await args.Channel.SendMessageAsync($"Arguments for this ability should match `{ability.ParameterRegex}`.");
-                    }
-                }
-                else
-                {
-                    await args.Channel.SendMessageAsync($"The **{supplierName}** ability group has no ability called **{abilityName}**.");
-                }
+                await ability.Invoke(args, mantra);
             }
             else
             {
-                await args.Channel.SendMessageAsync($"The **{supplierName}** ability group does not exist.");
+                await args.Channel.SendMessageAsync($"There is no ability called **{name}**.");
+            }
+        }
+        /// <summary>
+        /// A command for adding abilities to this server.
+        /// </summary>
+        /// <param name="args">The context for the message invoking the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
+        [CommandAttribute("create ability", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z]+)\"\\s+\"(?<description>[\\w\\W]+)\"(?<settings>[\\w\\W]+)$")]
+        private async Task CreateAbility(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+            string description = args["description"];
+            string settings = args["settings"];
+
+            Ability ability = new Ability(description, settings);
+
+            args.Config.Abilities.Add(name, ability);
+
+            await args.Channel.SendMessageAsync($"The **{name}** ability has been created!");
+        }
+        /// <summary>
+        /// A command for removing abilities from this server.
+        /// </summary>
+        /// <param name="args">The context for the message invoking the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
+        [CommandAttribute("remove ability", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z]+)\"")]
+        private async Task RemoveAbility(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+
+            if (args.Config.Abilities.Remove(name))
+            {
+                await args.Channel.SendMessageAsync($"The **{name}** ability has been removed.");
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync($"No ability named **{name}** exists.");
             }
         }
 
@@ -306,7 +326,7 @@ namespace AwardBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        protected async override Task ReactionAdded(ReactionAddArgs<AwardBotConfig> args)
+        protected async override Task ReactionAdded(ReactionAddArgs<RPGBotConfig> args)
         {
             DiscordMessage message = await args.Channel.GetMessageAsync(args.Message.Id);
             string emojiName = args.Emoji.GetDiscordName();
@@ -327,7 +347,7 @@ namespace AwardBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        protected async override Task ReactionRemoved(ReactionRemoveArgs<AwardBotConfig> args)
+        protected async override Task ReactionRemoved(ReactionRemoveArgs<RPGBotConfig> args)
         {
             DiscordMessage message = await args.Channel.GetMessageAsync(args.Message.Id);
             if (args.User.Id != message.Author.Id)
@@ -343,9 +363,9 @@ namespace AwardBot
         /// Generates the default config file for this bot.
         /// </summary>
         /// <returns>The default config object.</returns>
-        protected override AwardBotConfig CreateDefaultConfig()
+        protected override RPGBotConfig CreateDefaultConfig()
         {
-            return new AwardBotConfig('!');
+            return new RPGBotConfig('!');
         }
     }
 }

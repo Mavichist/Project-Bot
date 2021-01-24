@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace AwardBot
+namespace RPGBot
 {
     /// <summary>
     /// Represents the emoji reaction statistics of a single user.
@@ -58,7 +59,7 @@ namespace AwardBot
         /// <param name="userStats">The user statistics object.</param>
         /// <param name="awardName">The name of the award.</param>
         /// <returns>A boolean value indicating eligibility. Returns false if the award doesn't exist.</returns>
-        public bool EligibleFor(Award award)
+        public bool EligibleFor(Title award)
         {
             foreach (var pair in award.EmojiRequirements)
             {
@@ -68,6 +69,31 @@ namespace AwardBot
                 }
             }
             return true;
+        }
+        /// <summary>
+        /// Increments the current number of specified emojis the user has.
+        /// </summary>
+        /// <param name="emojiName">The name of the emoji to increment.</param>
+        /// <param name="amount">The amount to increment by.</param>
+        public void IncrementCount(string emojiName, int amount)
+        {
+            if (EmojiCounts.TryGetValue(emojiName, out int points))
+            {
+                EmojiCounts[emojiName] = Math.Max(points + amount, 0);
+            }
+            else
+            {
+                EmojiCounts[emojiName] = Math.Max(amount, 0);
+            }
+        }
+        /// <summary>
+        /// Sets the emoji count for a specified emoji.
+        /// </summary>
+        /// <param name="emojiName">The name of the emoji to increment.</param>
+        /// <param name="amount">The count to set the value to.</param>
+        public void SetCount(string emojiName, int count)
+        {
+            EmojiCounts[emojiName] = Math.Max(count, 0);
         }
     }
 }

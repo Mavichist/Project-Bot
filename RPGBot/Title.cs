@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace AwardBot
+namespace RPGBot
 {
     /// <summary>
     /// An award represents some kind of accomplishment on a Discord server.z
     /// Said accomplishments are based on user reactions, attempting to approximate a user's
     /// overall contribution using points allocated to different emojis.
     /// </summary>
-    public class Award
+    public class Title
     {
         /// <summary>
         /// A brief description for this award.
@@ -33,7 +33,7 @@ namespace AwardBot
         /// Creates a new instance of an award using the specified description.
         /// </summary>
         /// <param name="description">The award description.</param>
-        public Award(string description)
+        public Title(string description)
         {
             Description = description;
         }
