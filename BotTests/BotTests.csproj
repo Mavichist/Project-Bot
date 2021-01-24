@@ -3,7 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RoleBot\RoleBot.csproj" />
     <ProjectReference Include="..\HangoutBot\HangoutBot.csproj" />
-    <ProjectReference Include="..\AwardBot\AwardBot.csproj" />
+    <ProjectReference Include="..\RPGBot\RPGBot.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
