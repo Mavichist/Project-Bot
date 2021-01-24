@@ -67,23 +67,26 @@ namespace BotScaffold
         /// Attempts to invoke this command given the current user string.
         /// </summary>
         /// <param name="args">The message context used to invoke this command attempt.</param>
+        /// <param name="config">The configuration object for the specifc bot and server.</params>
+        /// <param name="instance">The bot instance running the current bot.</params>
         /// <returns>A task for handling the command.</returns>
-        public async Task<CommandState> AttemptAsync(MessageCreateEventArgs args, TConfig config)
+        public async Task<CommandState> AttemptAsync(MessageCreateEventArgs args, TConfig config, BotInstance instance)
         {
-            Match commandMatch = Regex.Match(args.Message.Content, $"^{config.Indicator}{CommandString}");
+            Match commandMatch = Regex.Match(args.Message.Content, $"^{config.Indicator}{CommandString}(?<parameters>[\\w\\W]*)$");
             if (commandMatch.Success)
             {
                 if (ParameterRegex is null)
                 {
-                    await Callback(new CommandArgs<TConfig>(null, args, config));
+                    await Callback(new CommandArgs<TConfig>(null, args, config, instance));
                     return CommandState.Handled;
                 }
                 else
                 {
-                    Match parameterMatch = Regex.Match(args.Message.Content, ParameterRegex);
+                    string parameters = commandMatch.Groups["parameters"].Value;
+                    Match parameterMatch = Regex.Match(parameters, ParameterRegex);
                     if (parameterMatch.Success)
                     {
-                        await Callback(new CommandArgs<TConfig>(parameterMatch, args, config));
+                        await Callback(new CommandArgs<TConfig>(parameterMatch, args, config, instance));
                         return CommandState.Handled;
                     }
                     else

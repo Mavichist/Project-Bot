@@ -14,6 +14,14 @@ namespace BotScaffold
     public class CommandArgs<TConfig> where TConfig : BotConfig
     {
         /// <summary>
+        /// The instance currently running the active bots.
+        /// </summary>
+        public BotInstance Instance
+        {
+            get;
+            private set;
+        }
+        /// <summary>
         /// The config object for the current bot and guild.
         /// </summary>
         public TConfig Config
@@ -126,11 +134,12 @@ namespace BotScaffold
         /// <param name="match">The original regex match for the command.</param>
         /// <param name="args">The arguments from the message creation event.</param>
         /// <param name="config">The config object for the server/guild.</param>
-        public CommandArgs(Match match, MessageCreateEventArgs args, TConfig config)
+        public CommandArgs(Match match, MessageCreateEventArgs args, TConfig config, BotInstance instance)
         {
             Match = match;
             Args = args;
             Config = config;
+            Instance = instance;
         }
     }
 }

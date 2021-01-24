@@ -251,7 +251,7 @@ namespace BotScaffold
                         if (c.CommandLevel <= level)
                         {
                             // If the regex matches and the command succeeds, we can skip the rest.
-                            CommandState state = await c.AttemptAsync(args, config);
+                            CommandState state = await c.AttemptAsync(args, config, Instance);
                             if (state == CommandState.Handled)
                             {
                                 break;
