@@ -37,15 +37,6 @@ namespace RPGBot
             get;
             private set;
         } = new Dictionary<ulong, UserEmojiStats>();
-        /// <summary>
-        /// A set of abilities registered to this server.
-        /// </summary>
-        [JsonInclude]
-        public Dictionary<string, Ability> Abilities
-        {
-            get;
-            private set;
-        } = new Dictionary<string, Ability>();
 
         /// <summary>
         /// Instantiates a new instance of an award bot config.

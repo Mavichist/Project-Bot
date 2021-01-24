@@ -221,7 +221,7 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("show my title", CommandLevel = CommandLevel.Unrestricted)]
+        [CommandAttribute("show my titles", CommandLevel = CommandLevel.Unrestricted)]
         private async Task ShowMyTitles(CommandArgs<RPGBotConfig> args)
         {
             DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
@@ -260,64 +260,7 @@ namespace RPGBot
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
-        /// <summary>
-        /// Invokes an ability with the given name.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("invoke", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<name>[a-zA-Z]+)\\s*(?<mantra>[\\w\\W]*)$")]
-        private async Task InvokeAbility(CommandArgs<RPGBotConfig> args)
-        {
-            string name = args["name"];
-            string mantra = args["mantra"];
-
-            if (args.Config.Abilities.TryGetValue(name, out Ability ability))
-            {
-                await ability.Invoke(args, mantra);
-            }
-            else
-            {
-                await args.Channel.SendMessageAsync($"There is no ability called **{name}**.");
-            }
-        }
-        /// <summary>
-        /// A command for adding abilities to this server.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("create ability", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z]+)\"\\s+\"(?<description>[\\w\\W]+)\"(?<settings>[\\w\\W]+)$")]
-        private async Task CreateAbility(CommandArgs<RPGBotConfig> args)
-        {
-            string name = args["name"];
-            string description = args["description"];
-            string settings = args["settings"];
-
-            Ability ability = new Ability(description, settings);
-
-            args.Config.Abilities.Add(name, ability);
-
-            await args.Channel.SendMessageAsync($"The **{name}** ability has been created!");
-        }
-        /// <summary>
-        /// A command for removing abilities from this server.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("remove ability", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z]+)\"")]
-        private async Task RemoveAbility(CommandArgs<RPGBotConfig> args)
-        {
-            string name = args["name"];
-
-            if (args.Config.Abilities.Remove(name))
-            {
-                await args.Channel.SendMessageAsync($"The **{name}** ability has been removed.");
-            }
-            else
-            {
-                await args.Channel.SendMessageAsync($"No ability named **{name}** exists.");
-            }
-        }
-
+        
         /// <summary>
         /// Fires when a user adds a reaction to a post.
         /// The user and post author cannot be bots.
