@@ -8,7 +8,7 @@ namespace BotScaffold
         {
             if (emoji.RequiresColons)
             {
-                return $"<{emoji.Name}{emoji.Id}>";
+                return $"<{emoji.GetDiscordName()}{emoji.Id}>";
             }
             else
             {
