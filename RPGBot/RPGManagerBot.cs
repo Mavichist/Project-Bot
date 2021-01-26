@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using BotScaffold;
@@ -11,6 +13,8 @@ namespace RPGBot
     public class RPGManagerBot : BotInstance.Bot<RPGBotConfig>
     {
         private const int BAR_RESOLUTION = 16;
+
+        private Dictionary<ulong, DateTime> lastWarnings = new Dictionary<ulong, DateTime>();
 
         /// <summary>
         /// Creates a new instance of an award manager bot, with the specified name.
@@ -39,6 +43,51 @@ namespace RPGBot
             }
             return false;
         }
+        private async Task DoAttack(CommandArgs<RPGBotConfig> args, DiscordMember author, DiscordMember target, Player attacker, Player defender)
+        {
+            DamageProfile.Result result = attacker.Damage + defender.Armor;
+            defender.Resources.AlterHealth(-result.Damage);
+            attacker.Resources.AlterStamina(-attacker.Damage.ManaCost);
+            attacker.Resources.AlterStamina(-attacker.Damage.StaminaCost);
+            
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle($"{author.DisplayName} attacks {target.DisplayName}!");
+            builder.WithDescription($"Using {attacker.Damage.Description} against {defender.Armor.Description}");
+            builder.WithColor(author.Color);
+            
+            if (result.Miss)
+            {
+                builder.AddField("**But misses!**", "*How embarassing.*");
+            }
+            else
+            {
+                if (result.CriticalHit)
+                {
+                    builder.AddField("🗡 **Critical hit!** 🗡", $"{attacker.Damage.CriticalStrike} vs {defender.Armor.Protection}");
+                }
+                if (result.PrimaryResisted)
+                {
+                    builder.AddField("🛡 **Primary stat resisted!** 🛡", $"{attacker.Damage.PrimaryType}");
+                }
+                if (result.SecondaryResisted)
+                {
+                    builder.AddField("✋ **Secondary stat resisted!** ✋", $"{attacker.Damage.SecondaryType}");
+                }
+                if (result.PrimaryVulnerable)
+                {
+                    builder.AddField("⚡ **Supereffective!** ⚡", $"{attacker.Damage.PrimaryType}");
+                }
+                if (result.SecondaryVulnerable)
+                {
+                    builder.AddField("👊 **Effective!** 👊", $"{attacker.Damage.SecondaryType}");
+                }
+                builder.AddField($"⚔ **Damage Dealt** 🏹", $"*{result.Damage} Health*");
+            }
+
+            DiscordEmbed embed = builder.Build();
+
+            await args.Channel.SendMessageAsync(null, false, embed);
+        }
 
         /// <summary>
         /// A command for issuing an attack on another user.
@@ -46,92 +95,58 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("attack", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "<@!(?<targetID>\\d+)>")]
+        [CommandAttribute("attack", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task Attack(CommandArgs<RPGBotConfig> args)
         {
-            ulong targetID = ulong.Parse(args["targetID"]);
             DiscordMember author = await args.Guild.GetMemberAsync(args.Author.Id);
-            DiscordMember target = await args.Guild.GetMemberAsync(targetID);
-
-            if (target != null)
+            if (args.MentionedUsers.Count > 0)
             {
-                Player attacker = args.Config.GetPlayer(author.Id);
-                Player defender = args.Config.GetPlayer(target.Id);
+                DiscordUser targetUser = args.FirstMentionedUser;
 
-                if (attacker.IsAlive)
+                if (targetUser != null)
                 {
-                    if (defender.IsAlive)
+                    DiscordMember target = await args.Guild.GetMemberAsync(targetUser.Id);
+                    Player attacker = args.Config.GetPlayer(author.Id);
+                    Player defender = args.Config.GetPlayer(target.Id);
+
+                    if (attacker.IsAlive)
                     {
-                        if (attacker.CanAttack)
+                        if (defender.IsAlive)
                         {
-                            if (await IsTargetInRange(attacker.Damage, target.Id, args))
+                            if (attacker.CanAttack)
                             {
-                                DamageProfile.Result result = attacker.Damage + defender.Armor;
-                                defender.Resources.AlterHealth(-result.Damage);
-                                attacker.Resources.AlterStamina(-attacker.Damage.ManaCost);
-                                attacker.Resources.AlterStamina(-attacker.Damage.StaminaCost);
-                                
-                                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-                                builder.WithTitle($"{author.DisplayName} attacks {target.DisplayName}!");
-                                builder.WithDescription($"Using {attacker.Damage.Description} against {defender.Armor.Description}");
-                                builder.WithColor(author.Color);
-                                
-                                if (result.Miss)
+                                if (await IsTargetInRange(attacker.Damage, target.Id, args))
                                 {
-                                    builder.AddField("**But misses!**", "*How embarassing.*");
+                                    await DoAttack(args, author, target, attacker, defender);
                                 }
                                 else
                                 {
-                                    if (result.CriticalHit)
-                                    {
-                                        builder.AddField("🗡 **Critical hit!** 🗡", $"{attacker.Damage.CriticalStrike} vs {defender.Armor.Protection}");
-                                    }
-                                    if (result.PrimaryResisted)
-                                    {
-                                        builder.AddField("🛡 **Primary stat resisted!** 🛡", $"{attacker.Damage.PrimaryType}");
-                                    }
-                                    if (result.SecondaryResisted)
-                                    {
-                                        builder.AddField("✋ **Secondary stat resisted!** ✋", $"{attacker.Damage.SecondaryType}");
-                                    }
-                                    if (result.PrimaryVulnerable)
-                                    {
-                                        builder.AddField("⚡ **Supereffective!** ⚡", $"{attacker.Damage.PrimaryType}");
-                                    }
-                                    if (result.SecondaryVulnerable)
-                                    {
-                                        builder.AddField("👊 **Effective!** 👊", $"{attacker.Damage.SecondaryType}");
-                                    }
-                                    builder.AddField($"⚔ **Damage Dealt** 🏹", $"*{result.Damage} Health*");
-                                }
-
-                                DiscordEmbed embed = builder.Build();
-
-                                await args.Channel.SendMessageAsync(null, false, embed);
+                                    await args.Channel.SendMessageAsync($"{author.Mention} the target is out of range!");
+                                }    
                             }
                             else
                             {
-                                await args.Channel.SendMessageAsync($"{author.Mention} the target is out of range!");
-                            }    
+                                await args.Channel.SendMessageAsync($"{author.Mention} you don't have enough resources to attack at the moment!");
+                            }
                         }
                         else
                         {
-                            await args.Channel.SendMessageAsync($"{author.Mention} you don't have enough resources to attack at the moment!");
+                            await args.Channel.SendMessageAsync($"{author.Mention} the target is already dead!");
                         }
                     }
                     else
                     {
-                        await args.Channel.SendMessageAsync($"{author.Mention} the target is already dead!");
+                        await args.Channel.SendMessageAsync($"{author.Mention} you can't attack because you're dead!");
                     }
                 }
                 else
                 {
-                    await args.Channel.SendMessageAsync($"{author.Mention} you can't attack because you're dead!");
+                    await args.Channel.SendMessageAsync($"{author.Mention} the target user doesn't seem to exist. Havin' a giggle?");
                 }
             }
             else
             {
-                await args.Channel.SendMessageAsync($"{author.Mention} the target user doesn't seem to exist. Havin' a giggle?");
+                await args.Channel.SendMessageAsync($"{author.Mention} you have to specify a target.");
             }
         }
         /// <summary>
@@ -188,6 +203,82 @@ namespace RPGBot
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
+        /// <summary>
+        /// Attempts to forge a weapon given the supplied arguments.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("forge weapon", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"\\s+\"(?<description>.+)\"\\s+(?<arguments>.*)")]
+        protected async Task ForgeWeapon(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+            string description = args["description"];
+            string arguments = args["arguments"];
+
+            DamageProfile profile = new DamageProfile();
+            profile.Description = description;
+            profile.Magnitude = arguments.ExtractInt("magnitude\\((?<value>\\d+)\\)") ?? profile.Magnitude;
+            profile.Spread = arguments.ExtractInt("spread\\((?<value>\\d+)\\)") ?? profile.Spread;
+            profile.CriticalStrike = arguments.ExtractInt("crit\\((?<value>\\d+)\\)") ?? profile.CriticalStrike;
+            profile.Accuracy = arguments.ExtractInt("accuracy\\((?<value>\\d+)\\)") ?? profile.Accuracy;
+            profile.PrimaryType = arguments.ExtractEnum<DamageType>("primary\\((?<value>[a-zA-Z]+)\\)") ?? profile.PrimaryType;
+            profile.SecondaryType = arguments.ExtractEnum<DamageType>("secondary\\((?<value>[a-zA-Z]+)\\)") ?? profile.PrimaryType;
+            profile.ManaCost = arguments.ExtractInt("mana\\((?<value>\\d+)\\)") ?? profile.ManaCost;
+            profile.StaminaCost = arguments.ExtractInt("stamina\\((?<value>\\d+)\\)") ?? profile.StaminaCost;
+
+            args.Config.Weapons[name] = profile;
+
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle("New weapon created!");
+            builder.WithDescription($"{name} - {profile.Description}");
+
+            builder.AddField("⚔ Damage Magnitude", $"{profile.Magnitude}");
+            builder.AddField("📈 Damage Spread", $"{profile.Spread}");
+            builder.AddField("🗡 Critical Strike", $"{profile.CriticalStrike}");
+            builder.AddField("🎯 Accuracy", $"{profile.Accuracy}");
+            builder.AddField("💥 Primary Type", $"{profile.PrimaryType}");
+            builder.AddField("🔥 Secondary Type", $"{profile.SecondaryType}");
+            builder.AddField("🔵 Mana Cost", $"{profile.ManaCost}");
+            builder.AddField("🟢 Stamina Cost", $"{profile.StaminaCost}");
+
+            await args.Channel.SendMessageAsync(null, false, builder.Build());
+        }
+        /// <summary>
+        /// Attempts to forge an armor piece given the supplied arguments.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("forge armor", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"\\s+\"(?<description>.+)\"\\s+(?<arguments>.*)")]
+        protected async Task ForgeArmor(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+            string description = args["description"];
+            string arguments = args["arguments"];
+
+            ArmorProfile profile = new ArmorProfile();
+            profile.Description = description;
+            profile.Magnitude = arguments.ExtractInt("magnitude\\((?<value>\\d+)\\)") ?? profile.Magnitude;
+            profile.Spread = arguments.ExtractInt("spread\\((?<value>\\d+)\\)") ?? profile.Spread;
+            profile.Protection = arguments.ExtractInt("protection\\((?<value>\\d+)\\)") ?? profile.Protection;
+            profile.Dodge = arguments.ExtractInt("dodge\\((?<value>\\d+)\\)") ?? profile.Dodge;
+            profile.Resists = arguments.ExtractEnum<DamageType>("resists\\((?<value>[a-zA-Z]+)\\)") ?? profile.Resists;
+            profile.Vulnerability = arguments.ExtractEnum<DamageType>("vulnerability\\((?<value>[a-zA-Z]+)\\)") ?? profile.Vulnerability;
+
+            args.Config.Armors[name] = profile;
+
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle("New armor piece created!");
+            builder.WithDescription($"{name} - {profile.Description}");
+
+            builder.AddField("🛡 Armor Magnitude", $"{profile.Magnitude}");
+            builder.AddField("📈 Armor Spread", $"{profile.Spread}");
+            builder.AddField("🧱 Protection", $"{profile.Protection}");
+            builder.AddField("🤸 Dodge", $"{profile.Dodge}");
+            builder.AddField("🛑 Resists", $"{profile.Resists}");
+            builder.AddField("💔 Vulnerability", $"{profile.Vulnerability}");
+
+            await args.Channel.SendMessageAsync(null, false, builder.Build());
+        }
 
         /// <summary>
         /// Fires when a user adds a reaction to a post.
@@ -207,7 +298,12 @@ namespace RPGBot
             }
             else
             {
-                await args.Channel.SendMessageAsync($"Nice try, {args.User.Mention}...");
+                if (!lastWarnings.TryGetValue(args.User.Id, out DateTime lastWarn) ||
+                    DateTime.Now - lastWarn > TimeSpan.FromMinutes(10))
+                {
+                    await args.Channel.SendMessageAsync($"Nice try, {args.User.Mention}...");
+                    lastWarnings[args.User.Id] = DateTime.Now;
+                }
             }
         }
         /// <summary>

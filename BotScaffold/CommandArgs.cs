@@ -126,7 +126,25 @@ namespace BotScaffold
                 return Args.MentionedChannels;
             }
         }
-        
+        /// <summary>
+        /// Returns the first user of the mentioned users, if any were mentioned.
+        /// </summary>
+        public DiscordUser FirstMentionedUser
+        {
+            get
+            {
+                var enumerator = Args.MentionedUsers.GetEnumerator();
+                if (enumerator.MoveNext())
+                {
+                    return enumerator.Current;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         /// <summary>
         /// Creates a new command args object from the regex match, the message arguments and the
         /// config for the current bot and server/guild.

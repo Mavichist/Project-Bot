@@ -35,7 +35,7 @@ namespace RPGBot
         public string Description
         {
             get;
-            private set;
+            set;
         } = "Fists";
         /// <summary>
         /// The total magnitude of this weapon's offences.
@@ -156,24 +156,24 @@ namespace RPGBot
                 float modifier = 1f;
 
                 // Calculate resistances and vulnerability for the primary type.
-                if (armor.Resistances.Contains(damage.PrimaryType))
+                if (armor.Resists == damage.PrimaryType)
                 {
                     modifier -= 0.5f;
                     result.PrimaryResisted = true;
                 }
-                else if (armor.Vulnerabilities.Contains(damage.PrimaryType))
+                else if (armor.Vulnerability == damage.PrimaryType)
                 {
                     modifier += 0.5f;
                     result.PrimaryVulnerable = true;
                 }
 
                 // Calculate the resistances and vulnerability for the secondary type.
-                if (armor.Resistances.Contains(damage.SecondaryType))
+                if (armor.Resists == damage.SecondaryType)
                 {
                     modifier -= 0.25f;
                     result.SecondaryResisted = true;
                 }
-                else if (armor.Vulnerabilities.Contains(damage.SecondaryType))
+                else if (armor.Vulnerability == damage.SecondaryType)
                 {
                     modifier += 0.25f;
                     result.SecondaryVulnerable = true;

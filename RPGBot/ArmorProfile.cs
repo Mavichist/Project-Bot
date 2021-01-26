@@ -15,7 +15,7 @@ namespace RPGBot
         public string Description
         {
             get;
-            private set;
+            set;
         } = "Rags";
         /// <summary>
         /// The total magnitude of this armor's defences.
@@ -58,20 +58,20 @@ namespace RPGBot
         /// A list of damage types that this armor resists.
         /// </summary>
         [JsonInclude]
-        public List<DamageType> Resistances
+        public DamageType Resists
         {
             get;
             set;
-        } = new List<DamageType>();
+        } = DamageType.None;
         /// <summary>
         /// A list of damage types this armor is vulnerable to.
         /// </summary>
         [JsonInclude]
-        public List<DamageType> Vulnerabilities
+        public DamageType Vulnerability
         {
             get;
             set;
-        } = new List<DamageType>();
+        } = DamageType.None;
         
         /// <summary>
         /// This is the preferred way of copying the stats of an armor profile to a player because
@@ -85,11 +85,8 @@ namespace RPGBot
             Spread = other.Spread;
             Protection = other.Protection;
             Dodge = other.Dodge;
-            Resistances = other.Resistances;
-            Resistances.Clear();
-            Resistances.AddRange(other.Resistances);
-            Vulnerabilities.Clear();
-            Vulnerabilities.AddRange(other.Vulnerabilities);
+            Resists = other.Resists;
+            Vulnerability = other.Vulnerability;
         }
     }
 }

@@ -107,13 +107,21 @@ namespace RPGBot
             if (Currency.TryGetValue(emojiName, out int current))
             {
                 newAmount = Math.Max(current + amount, 0);
-                Currency[emojiName] = newAmount;
             }
             else
             {
                 newAmount = Math.Max(amount, 0);
+            }
+
+            if (newAmount == 0)
+            {
+                Currency.Remove(emojiName);
+            }
+            else
+            {
                 Currency[emojiName] = newAmount;
             }
+            
             return newAmount;
         }
         /// <summary>

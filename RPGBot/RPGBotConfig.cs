@@ -19,6 +19,24 @@ namespace RPGBot
             get;
             private set;
         } = new Dictionary<ulong, Player>();
+        /// <summary>
+        /// A set of available weapons in the game.
+        /// </summary>
+        [JsonInclude]
+        public Dictionary<string, DamageProfile> Weapons
+        {
+            get;
+            private set;
+        } = new Dictionary<string, DamageProfile>();
+        /// <summary>
+        /// A set of available armors.
+        /// </summary>
+        [JsonInclude]
+        public Dictionary<string, ArmorProfile> Armors
+        {
+            get;
+            private set;
+        } = new Dictionary<string, ArmorProfile>();
 
         /// <summary>
         /// Instantiates a new instance of an award bot config.
