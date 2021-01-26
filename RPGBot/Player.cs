@@ -18,30 +18,45 @@ namespace RPGBot
             get;
             private set;
         } = new Dictionary<string, int>();
+        /// <summary>
+        /// This player's title, such as 'Adventurer' or 'Mother of Dragons'.
+        /// </summary>
         [JsonInclude]
         public string Title
         {
             get;
             set;
         } = "Adventurer";
+        /// <summary>
+        /// The damage dealt by this player's weapon.
+        /// </summary>
         [JsonInclude]
         public DamageProfile Damage
         {
             get;
             private set;
         } = new DamageProfile();
+        /// <summary>
+        /// The defences of the armor this player is wearing.
+        /// </summary>
         [JsonInclude]
         public ArmorProfile Armor
         {
             get;
             private set;
         } = new ArmorProfile();
+        /// <summary>
+        /// The personal resources of the player, such as mana, health and stamina.
+        /// </summary>
         [JsonInclude]
         public ResourceProfile Resources
         {
             get;
             private set;
         } = new ResourceProfile();
+        /// <summary>
+        /// Indicates whether the player is alive (their health is above 0).
+        /// </summary>
         public bool IsAlive
         {
             get
@@ -49,6 +64,9 @@ namespace RPGBot
                 return Resources.Health > 0;
             }
         }
+        /// <summary>
+        /// Indicates whether the player can attack (they are alive and have the mana/stamina to do so).
+        /// </summary>
         public bool CanAttack
         {
             get

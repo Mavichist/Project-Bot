@@ -21,64 +21,99 @@ namespace RPGBot
         Lightning
     }
 
+    /// <summary>
+    /// Represents the damage done by a weapon and peripheral information like attack range.
+    /// </summary>
     public class DamageProfile
     {
         private static Random random = new Random();
 
+        /// <summary>
+        /// A description of the weapon.
+        /// </summary>
         [JsonInclude]
         public string Description
         {
             get;
             private set;
         } = "Fists";
+        /// <summary>
+        /// The total magnitude of this weapon's offences.
+        /// </summary>
         [JsonInclude]
         public int Magnitude
         {
             get;
             set;
         } = 3;
+        /// <summary>
+        /// Indicates the point spread of the weapon's attack damage.
+        /// Higher values indicate an unpredictable weapon.
+        /// </summary>
         [JsonInclude]
         public int Spread
         {
             get;
             set;
         } = 2;
+        /// <summary>
+        /// Represents the likelihood of a critical strike.
+        /// </summary>
         [JsonInclude]
         public int CriticalStrike
         {
             get;
             set;
         } = 1;
+        /// <summary>
+        /// Represents the likelihood that attacks with this weapon will hit.
+        /// </summary>
         [JsonInclude]
         public int Accuracy
         {
             get;
             set;
         } = 4;
+        /// <summary>
+        /// The primary damage type dealt by this weapon.
+        /// </summary>
         [JsonInclude]
         public DamageType PrimaryType
         {
             get;
             set;
         } = DamageType.Bludgeoning;
+        /// <summary>
+        /// The secondary damage type dealt by this weapon.
+        /// </summary>
         [JsonInclude]
         public DamageType SecondaryType
         {
             get;
             set;
         } = DamageType.None;
+        /// <summary>
+        /// The stamina cost for using this weapon.
+        /// </summary>
         [JsonInclude]
         public int StaminaCost
         {
             get;
             set;
         } = 5;
+        /// <summary>
+        /// The mana cost for using this weapon.
+        /// </summary>
         [JsonInclude]
         public int ManaCost
         {
             get;
             set;
         } = 0;
+        /// <summary>
+        /// The maximum number of posts a target can be from the attack command message.
+        /// Attacks are considered to occur within a channel.
+        /// </summary>
         [JsonInclude]
         public int Range
         {
@@ -105,6 +140,12 @@ namespace RPGBot
             Range = other.Range;
         }
         
+        /// <summary>
+        /// Calculates the resultant damage for an attack using a damage and armor profile.
+        /// </summary>
+        /// <param name="damage">The attack profile.</param>
+        /// <param name="armor">The defence profile.</param>
+        /// <returns>The result of the attack.</returns>
         public static Result CalculateDamage(DamageProfile damage, ArmorProfile armor)
         {
             Result result = new Result();
@@ -164,38 +205,62 @@ namespace RPGBot
             return CalculateDamage(damage, armor);
         }
 
+        /// <summary>
+        /// Represents the outcome of a single attack.
+        /// </summary>
         public struct Result
         {
+            /// <summary>
+            /// The raw damage to health dealt by the attack.
+            /// </summary>
             public int Damage
             {
                 get;
                 set;
             }
+            /// <summary>
+            /// Indicates whether the attack was a critical hit.
+            /// </summary>
             public bool CriticalHit
             {
                 get;
                 set;
             }
+            /// <summary>
+            /// Indicates whether the primary stat was resisted by the target's armor.
+            /// </summary>
             public bool PrimaryResisted
             {
                 get;
                 set;
             }
+            /// <summary>
+            /// Indicates whether the secondary stat was resisted by the target's armor.
+            /// </summary>
             public bool SecondaryResisted
             {
                 get;
                 set;
             }
+            /// <summary>
+            /// Indicates whether the armor was vulnerable to the attack's primary type.
+            /// </summary>
             public bool PrimaryVulnerable
             {
                 get;
                 set;
             }
+            /// <summary>
+            /// Indicates whether the armor was vulnerable to the attack's secondary type.
+            /// </summary>
             public bool SecondaryVulnerable
             {
                 get;
                 set;
             }
+            /// <summary>
+            /// Indicates whether the attack missed.
+            /// </summary>
             public bool Miss
             {
                 get;

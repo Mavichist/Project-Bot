@@ -3,42 +3,63 @@ using System.Text.Json.Serialization;
 
 namespace RPGBot
 {
+    /// <summary>
+    /// Represents the personal resources of a player.
+    /// </summary>
     public class ResourceProfile
     {
         public const int MAX_HEALTH_MINIMUM = 10;
         public const int MAX_MANA_MINIMUM = 10;
         public const int MAX_STAMINA_MINIMUM = 10;
 
+        /// <summary>
+        /// The hitpoints the player can endure before dying.
+        /// </summary>
         [JsonInclude]
         public int Health
         {
             get;
             private set;
         }
+        /// <summary>
+        /// The maximum hitpoints this player can have.
+        /// </summary>
         [JsonInclude]
         public int MaxHealth
         {
             get;
             private set;
         }
+        /// <summary>
+        /// The mana the player can expend.
+        /// </summary>
         [JsonInclude]
         public int Mana
         {
             get;
             private set;
         }
+        /// <summary>
+        /// The maximum amount of mana this player can have.
+        /// </summary>
         [JsonInclude]
         public int MaxMana
         {
             get;
             private set;
         }
+        /// <summary>
+        /// The stamina the player can expend.
+        /// </summary>
         [JsonInclude]
         public int Stamina
         {
             get;
             private set;
         }
+        /// <summary>
+        /// The maximum amount of stamina this player can have.
+        /// </summary>
         [JsonInclude]
         public int MaxStamina
         {
@@ -46,6 +67,12 @@ namespace RPGBot
             private set;
         }
 
+        /// <summary>
+        /// Creates a new resource profile using the health, mana and stamina values.
+        /// </summary>
+        /// <param name="maxHealth">The maximum amount of health the player can have.</param>
+        /// <param name="maxMana">The maximum amount of mana the player can have.</param>
+        /// <param name="maxStamina">The maximum amount of stamina the player can have.</param>
         public ResourceProfile(int maxHealth = 100, int maxMana = 100, int maxStamina = 100)
         {
             Health = MaxHealth = maxHealth;

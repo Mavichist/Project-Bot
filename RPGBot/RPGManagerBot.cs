@@ -21,11 +21,18 @@ namespace RPGBot
 
         }
 
-        private async Task<bool> IsTargetInRange(DamageProfile damage, ulong userID, CommandArgs<RPGBotConfig> args)
+        /// <summary>
+        /// Determines whether the target is within weapons range.
+        /// </summary>
+        /// <param name="damage">The weapon used for the attack.</param>
+        /// <param name="targetID">The ID of the target user.</param>
+        /// <param name="args">The command arguments for the attack.</param>
+        /// <returns></returns>
+        private async Task<bool> IsTargetInRange(DamageProfile damage, ulong targetID, CommandArgs<RPGBotConfig> args)
         {
             foreach (var post in await args.Channel.GetMessagesBeforeAsync(args.Message.Id, damage.Range))
             {
-                if (post.Author.Id == userID)
+                if (post.Author.Id == targetID)
                 {
                     return true;
                 }
@@ -33,6 +40,12 @@ namespace RPGBot
             return false;
         }
 
+        /// <summary>
+        /// A command for issuing an attack on another user.
+        /// The target user must have a recent post in the channel within the weapon's range.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
         [CommandAttribute("attack", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "<@!(?<targetID>\\d+)>")]
         protected async Task Attack(CommandArgs<RPGBotConfig> args)
         {
@@ -59,7 +72,7 @@ namespace RPGBot
                                 attacker.Resources.AlterStamina(-attacker.Damage.StaminaCost);
                                 
                                 DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-                                builder.WithTitle($"{author.DisplayName}, {attacker.Title} attacks {target.DisplayName}, {defender.Title}!");
+                                builder.WithTitle($"{author.DisplayName}[{attacker.Title}] attacks {target.DisplayName}[{defender.Title}]!");
                                 builder.WithDescription($"Using {attacker.Damage.Description}");
                                 builder.WithColor(author.Color);
                                 
@@ -89,7 +102,7 @@ namespace RPGBot
                                     {
                                         builder.AddField("👊 **Effective!** 👊", $"{attacker.Damage.SecondaryType}");
                                     }
-                                    builder.AddField($"⚔ **Damage Dealt** 🏹", $"*{result.Damage}* Health*");
+                                    builder.AddField($"⚔ **Damage Dealt** 🏹", $"*{result.Damage} Health*");
                                 }
 
                                 DiscordEmbed embed = builder.Build();
@@ -121,6 +134,11 @@ namespace RPGBot
                 await args.Channel.SendMessageAsync($"{author.Mention} the target user doesn't seem to exist. Havin' a giggle?");
             }
         }
+        /// <summary>
+        /// A command for showing the user's purse.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
         [CommandAttribute("show purse", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowPurse(CommandArgs<RPGBotConfig> args)
         {
@@ -140,6 +158,11 @@ namespace RPGBot
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
+        /// <summary>
+        /// A command for showing the user's health, mana and stamina.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
         [CommandAttribute("show resources", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowResources(CommandArgs<RPGBotConfig> args)
         {
@@ -209,7 +232,14 @@ namespace RPGBot
         {
             return new RPGBotConfig('!');
         }
-    
+
+        /// <summary>
+        /// A small helper method that creates a stat bar for visual aid.
+        /// </summary>
+        /// <param name="unit">The block/character used for each quantized part of the bar.</param>
+        /// <param name="value">The value of the statistic the bar represents.</param>
+        /// <param name="maxValue">The maximum value of the statistic the bar represents.</param>
+        /// <returns>A string containing the formatted bar.</returns>
         public static string CreateBar(string unit, int value, int maxValue)
         {
             StringBuilder builder = new StringBuilder();
