@@ -72,8 +72,8 @@ namespace RPGBot
                                 attacker.Resources.AlterStamina(-attacker.Damage.StaminaCost);
                                 
                                 DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-                                builder.WithTitle($"{author.DisplayName}[{attacker.Title}] attacks {target.DisplayName}[{defender.Title}]!");
-                                builder.WithDescription($"Using {attacker.Damage.Description}");
+                                builder.WithTitle($"{author.DisplayName} attacks {target.DisplayName}!");
+                                builder.WithDescription($"Using {attacker.Damage.Description} against {defender.Armor.Description}");
                                 builder.WithColor(author.Color);
                                 
                                 if (result.Miss)
