@@ -139,14 +139,14 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("show purse", CommandLevel = CommandLevel.Unrestricted)]
-        protected async Task ShowPurse(CommandArgs<RPGBotConfig> args)
+        [CommandAttribute("show stash", CommandLevel = CommandLevel.Unrestricted)]
+        protected async Task ShowStash(CommandArgs<RPGBotConfig> args)
         {
             DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
             Player player = args.Config.GetPlayer(member.Id);
 
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"**{member.DisplayName}'s Purse:**");
+            builder.WithTitle($"**{member.DisplayName}'s Stash:**");
             builder.WithThumbnail(member.AvatarUrl);
             builder.WithColor(member.Color);
             
@@ -163,7 +163,7 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("show me", CommandLevel = CommandLevel.Unrestricted)]
+        [CommandAttribute("show stats", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowMe(CommandArgs<RPGBotConfig> args)
         {
             DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
