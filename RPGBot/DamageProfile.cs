@@ -156,24 +156,24 @@ namespace RPGBot
                 float modifier = 1f;
 
                 // Calculate resistances and vulnerability for the primary type.
-                if (armor.Resists == damage.PrimaryType)
+                if (armor.Resists != DamageType.None && armor.Resists == damage.PrimaryType)
                 {
                     modifier -= 0.5f;
                     result.PrimaryResisted = true;
                 }
-                else if (armor.Vulnerability == damage.PrimaryType)
+                else if (armor.Vulnerability != DamageType.None && armor.Vulnerability == damage.PrimaryType)
                 {
                     modifier += 0.5f;
                     result.PrimaryVulnerable = true;
                 }
 
                 // Calculate the resistances and vulnerability for the secondary type.
-                if (armor.Resists == damage.SecondaryType)
+                if (armor.Resists != DamageType.None && armor.Resists == damage.SecondaryType)
                 {
                     modifier -= 0.25f;
                     result.SecondaryResisted = true;
                 }
-                else if (armor.Vulnerability == damage.SecondaryType)
+                else if (armor.Vulnerability != DamageType.None && armor.Vulnerability == damage.SecondaryType)
                 {
                     modifier += 0.25f;
                     result.SecondaryVulnerable = true;
