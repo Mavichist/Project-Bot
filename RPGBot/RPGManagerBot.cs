@@ -163,14 +163,15 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("show resources", CommandLevel = CommandLevel.Unrestricted)]
-        protected async Task ShowResources(CommandArgs<RPGBotConfig> args)
+        [CommandAttribute("show me", CommandLevel = CommandLevel.Unrestricted)]
+        protected async Task ShowMe(CommandArgs<RPGBotConfig> args)
         {
             DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
             Player player = args.Config.GetPlayer(member.Id);
 
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"**{member.DisplayName}'s Resources:**");
+            builder.WithTitle($"Resources for {member.DisplayName}:");
+            builder.WithDescription($"Title: {player.Title}");
             builder.WithThumbnail(member.AvatarUrl);
             builder.WithColor(member.Color);
 
@@ -182,6 +183,8 @@ namespace RPGBot
 
             string staminaBar = CreateBar("🟩", "⬛", player.Resources.Stamina, player.Resources.MaxStamina);
             builder.AddField($"Stamina: {player.Resources.Stamina}/{player.Resources.MaxStamina}", staminaBar);
+
+            builder.AddField($"Status: {(player.IsAlive ? "Alive" : "Dead")}", "*For now...*");
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
