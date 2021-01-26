@@ -98,55 +98,58 @@ namespace RPGBot
         [CommandAttribute("attack", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task Attack(CommandArgs<RPGBotConfig> args)
         {
-            DiscordMember author = await args.Guild.GetMemberAsync(args.Author.Id);
-            if (args.MentionedUsers.Count > 0)
+            if (args.Config.PVPChannels.Contains(args.Channel.Id))
             {
-                DiscordUser targetUser = args.FirstMentionedUser;
-
-                if (targetUser != null)
+                DiscordMember author = await args.Guild.GetMemberAsync(args.Author.Id);
+                if (args.MentionedUsers.Count > 0)
                 {
-                    DiscordMember target = await args.Guild.GetMemberAsync(targetUser.Id);
-                    Player attacker = args.Config.GetPlayer(author.Id);
-                    Player defender = args.Config.GetPlayer(target.Id);
+                    DiscordUser targetUser = args.FirstMentionedUser;
 
-                    if (attacker.IsAlive)
+                    if (targetUser != null)
                     {
-                        if (defender.IsAlive)
+                        DiscordMember target = await args.Guild.GetMemberAsync(targetUser.Id);
+                        Player attacker = args.Config.GetPlayer(author.Id);
+                        Player defender = args.Config.GetPlayer(target.Id);
+
+                        if (attacker.IsAlive)
                         {
-                            if (attacker.CanAttack)
+                            if (defender.IsAlive)
                             {
-                                if (await IsTargetInRange(attacker.Damage, target.Id, args))
+                                if (attacker.CanAttack)
                                 {
-                                    await DoAttack(args, author, target, attacker, defender);
+                                    if (await IsTargetInRange(attacker.Damage, target.Id, args))
+                                    {
+                                        await DoAttack(args, author, target, attacker, defender);
+                                    }
+                                    else
+                                    {
+                                        await args.Channel.SendMessageAsync($"{author.Mention} the target is out of range!");
+                                    }    
                                 }
                                 else
                                 {
-                                    await args.Channel.SendMessageAsync($"{author.Mention} the target is out of range!");
-                                }    
+                                    await args.Channel.SendMessageAsync($"{author.Mention} you don't have enough resources to attack at the moment!");
+                                }
                             }
                             else
                             {
-                                await args.Channel.SendMessageAsync($"{author.Mention} you don't have enough resources to attack at the moment!");
+                                await args.Channel.SendMessageAsync($"{author.Mention} the target is already dead!");
                             }
                         }
                         else
                         {
-                            await args.Channel.SendMessageAsync($"{author.Mention} the target is already dead!");
+                            await args.Channel.SendMessageAsync($"{author.Mention} you can't attack because you're dead!");
                         }
                     }
                     else
                     {
-                        await args.Channel.SendMessageAsync($"{author.Mention} you can't attack because you're dead!");
+                        await args.Channel.SendMessageAsync($"{author.Mention} the target user doesn't seem to exist. Havin' a giggle?");
                     }
                 }
                 else
                 {
-                    await args.Channel.SendMessageAsync($"{author.Mention} the target user doesn't seem to exist. Havin' a giggle?");
+                    await args.Channel.SendMessageAsync($"{author.Mention} you have to specify a target.");
                 }
-            }
-            else
-            {
-                await args.Channel.SendMessageAsync($"{author.Mention} you have to specify a target.");
             }
         }
         /// <summary>
@@ -157,21 +160,24 @@ namespace RPGBot
         [CommandAttribute("show stash", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowStash(CommandArgs<RPGBotConfig> args)
         {
-            DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
-            Player player = args.Config.GetPlayer(member.Id);
-
-            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"**{member.DisplayName}'s Stash:**");
-            builder.WithThumbnail(member.AvatarUrl);
-            builder.WithColor(member.Color);
-            
-            foreach (var currency in player.Currency)
+            if (args.Config.StatChannels.Contains(args.Channel.Id))
             {
-                DiscordEmoji emoji = DiscordEmoji.FromName(args.Instance.Client, currency.Key);
-                builder.AddField(emoji.FormatName(), $"**{currency.Value}**", true);
-            }
+                DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
+                Player player = args.Config.GetPlayer(member.Id);
 
-            await args.Channel.SendMessageAsync(null, false, builder.Build());
+                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+                builder.WithTitle($"**{member.DisplayName}'s Stash:**");
+                builder.WithThumbnail(member.AvatarUrl);
+                builder.WithColor(member.Color);
+                
+                foreach (var currency in player.Currency)
+                {
+                    DiscordEmoji emoji = DiscordEmoji.FromName(args.Instance.Client, currency.Key);
+                    builder.AddField(emoji.FormatName(), $"**{currency.Value}**", true);
+                }
+
+                await args.Channel.SendMessageAsync(null, false, builder.Build());
+            }
         }
         /// <summary>
         /// A command for showing the user's health, mana and stamina.
@@ -181,27 +187,30 @@ namespace RPGBot
         [CommandAttribute("show stats", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowMe(CommandArgs<RPGBotConfig> args)
         {
-            DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
-            Player player = args.Config.GetPlayer(member.Id);
+            if (args.Config.StatChannels.Contains(args.Channel.Id))
+            {
+                DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
+                Player player = args.Config.GetPlayer(member.Id);
 
-            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"Resources for {member.DisplayName}:");
-            builder.WithDescription($"Title: {player.Title}");
-            builder.WithThumbnail(member.AvatarUrl);
-            builder.WithColor(member.Color);
+                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+                builder.WithTitle($"Resources for {member.DisplayName}:");
+                builder.WithDescription($"Title: {player.Title}");
+                builder.WithThumbnail(member.AvatarUrl);
+                builder.WithColor(member.Color);
 
-            string healthBar = CreateBar("🟥", "⬛", player.Resources.Health, player.Resources.MaxHealth);
-            builder.AddField($"Health: {player.Resources.Health}/{player.Resources.MaxHealth}", healthBar);
+                string healthBar = CreateBar("🟥", "⬛", player.Resources.Health, player.Resources.MaxHealth);
+                builder.AddField($"Health: {player.Resources.Health}/{player.Resources.MaxHealth}", healthBar);
 
-            string manaBar = CreateBar("🟦", "⬛", player.Resources.Mana, player.Resources.MaxMana);
-            builder.AddField($"Mana: {player.Resources.Mana}/{player.Resources.MaxMana}", manaBar);
+                string manaBar = CreateBar("🟦", "⬛", player.Resources.Mana, player.Resources.MaxMana);
+                builder.AddField($"Mana: {player.Resources.Mana}/{player.Resources.MaxMana}", manaBar);
 
-            string staminaBar = CreateBar("🟩", "⬛", player.Resources.Stamina, player.Resources.MaxStamina);
-            builder.AddField($"Stamina: {player.Resources.Stamina}/{player.Resources.MaxStamina}", staminaBar);
+                string staminaBar = CreateBar("🟩", "⬛", player.Resources.Stamina, player.Resources.MaxStamina);
+                builder.AddField($"Stamina: {player.Resources.Stamina}/{player.Resources.MaxStamina}", staminaBar);
 
-            builder.AddField($"Status: {(player.IsAlive ? "Alive" : "Dead")}", "*For now...*");
+                builder.AddField($"Status: {(player.IsAlive ? "Alive" : "Dead")}", "*For now...*");
 
-            await args.Channel.SendMessageAsync(null, false, builder.Build());
+                await args.Channel.SendMessageAsync(null, false, builder.Build());
+            }
         }
         /// <summary>
         /// Attempts to forge a weapon given the supplied arguments.
@@ -278,6 +287,44 @@ namespace RPGBot
             builder.AddField("💔 Vulnerability", $"{profile.Vulnerability}");
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
+        }
+        /// <summary>
+        /// A command for toggling whether a channel can host stat commands.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("toggle stat channel", CommandLevel = CommandLevel.Admin)]
+        protected async Task ToggleStatChannel(CommandArgs<RPGBotConfig> args)
+        {
+            if (args.Config.StatChannels.Contains(args.Channel.Id))
+            {
+                args.Config.StatChannels.Remove(args.Channel.Id);
+                await args.Channel.SendMessageAsync("This channel is no longer a stats channel!");
+            }
+            else
+            {
+                args.Config.StatChannels.Add(args.Channel.Id);
+                await args.Channel.SendMessageAsync("This channel is now a stats channel!");
+            }
+        }
+        /// <summary>
+        /// A command for toggling whether a channel can host pvp commands.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("toggle pvp channel", CommandLevel = CommandLevel.Admin)]
+        protected async Task TogglePVPChannel(CommandArgs<RPGBotConfig> args)
+        {
+            if (args.Config.PVPChannels.Contains(args.Channel.Id))
+            {
+                args.Config.PVPChannels.Remove(args.Channel.Id);
+                await args.Channel.SendMessageAsync("This channel is no longer a stats channel!");
+            }
+            else
+            {
+                args.Config.PVPChannels.Add(args.Channel.Id);
+                await args.Channel.SendMessageAsync("This channel is now a stats channel!");
+            }
         }
 
         /// <summary>

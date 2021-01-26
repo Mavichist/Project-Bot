@@ -37,6 +37,24 @@ namespace RPGBot
             get;
             private set;
         } = new Dictionary<string, ArmorProfile>();
+        /// <summary>
+        /// Specifies the set of channel IDs of stat-related commands to reduce spam.
+        /// </summary>
+        [JsonInclude]
+        public HashSet<ulong> StatChannels
+        {
+            get;
+            private set;
+        } = new HashSet<ulong>();
+        /// <summary>
+        /// A set of channel IDs for pvp-enabled zones.
+        /// </summary>
+        [JsonInclude]
+        public HashSet<ulong> PVPChannels
+        {
+            get;
+            private set;
+        } = new HashSet<ulong>();
 
         /// <summary>
         /// Instantiates a new instance of an award bot config.

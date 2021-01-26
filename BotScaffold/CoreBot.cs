@@ -105,6 +105,11 @@ namespace BotScaffold
                 }
             }
         }
+        /// <summary>
+        /// A command for saving all configuration objects immediately.
+        /// </summary>
+        /// <param name="args">The context for the message invoking the command.</param>
+        /// <returns>An awaitable task for the command.</returns>
         [CommandAttribute("save all", CommandLevel = CommandLevel.Admin)]
         protected async Task SaveAll(CommandArgs<BotConfig> args)
         {
