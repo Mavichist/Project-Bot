@@ -10,33 +10,15 @@ namespace RPGBot
     public class RPGBotConfig : BotConfig
     {
         /// <summary>
-        /// A set of emoji names and their associated point values.
-        /// </summary>
-        [JsonInclude]
-        public Dictionary<string, int> EmojiPoints
-        {
-            get;
-            private set;
-        } = new Dictionary<string, int>();
-        /// <summary>
-        /// A set of awards currently registered with the bot.
-        /// </summary>
-        [JsonInclude]
-        public Dictionary<string, Title> Titles
-        {
-            get;
-            private set;
-        } = new Dictionary<string, Title>();
-        /// <summary>
         /// A set of user statistics for all members of the current server.
         /// </summary>
         /// <value></value>
         [JsonInclude]
-        public Dictionary<ulong, UserEmojiStats> UserStats
+        public Dictionary<ulong, Player> Players
         {
             get;
             private set;
-        } = new Dictionary<ulong, UserEmojiStats>();
+        } = new Dictionary<ulong, Player>();
 
         /// <summary>
         /// Instantiates a new instance of an award bot config.
@@ -53,79 +35,14 @@ namespace RPGBot
         /// </summary>
         /// <param name="userID">The Discord identifier for the user.</param>
         /// <returns>A statistics object for the user.</returns>
-        public UserEmojiStats GetStats(ulong userID)
+        public Player GetPlayer(ulong userID)
         {
-            if (!UserStats.TryGetValue(userID, out UserEmojiStats stats))
+            if (!Players.TryGetValue(userID, out Player player))
             {
-                stats = new UserEmojiStats();
-                UserStats.Add(userID, stats);
+                player = new Player();
+                Players.Add(userID, player);
             }
-            return stats;
-        }
-        /// <summary>
-        /// Returns the number of points an emoji is worth.
-        /// Emojis not registered have a point value of 0.
-        /// </summary>
-        /// <param name="emojiName">The name of the emoji.</param>
-        /// <returns>The number of points the emoji is worth.</returns>
-        public int GetPoints(string emojiName)
-        {
-            if (EmojiPoints.TryGetValue(emojiName, out int points))
-            {
-                return points;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        /// <summary>
-        /// Determines if a user meets the requirements for a title.
-        /// </summary>
-        /// <param name="userID">The ID of the user to check.</param>
-        /// <param name="titleName">The name of the title to check requirements for.</param>
-        /// <returns>True if the user is eligible for the title, false if not.
-        /// Returns false if either the user or the title do not exist.</returns>
-        public bool HasTitle(ulong userID, string titleName)
-        {
-            if (Titles.TryGetValue(titleName, out Title award))
-            {
-                if (UserStats.TryGetValue(userID, out UserEmojiStats stats))
-                {
-                    return stats.EligibleFor(award);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-        /// <summary>
-        /// Retrieves the total points for a user.
-        /// </summary>
-        /// <param name="userID">The ID for the user.</param>
-        /// <returns>An integer denoting the total number of points the user has.</returns>
-        public int GetTotalPoints(ulong userID)
-        {
-            if (UserStats.TryGetValue(userID, out UserEmojiStats stats))
-            {
-                int total = 0;
-
-                foreach (var emoji in stats.EmojiCounts)
-                {
-                    total += GetPoints(emoji.Key) * emoji.Value;
-                }
-
-                return total;
-            }
-            else
-            {
-                return 0;
-            }
+            return player;
         }
     }
 }

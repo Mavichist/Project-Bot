@@ -1,4 +1,4 @@
-using System;
+using System.Text;
 using System.Threading.Tasks;
 using BotScaffold;
 using DSharpPlus.Entities;
@@ -10,6 +10,8 @@ namespace RPGBot
     /// </summary>
     public class RPGManagerBot : BotInstance.Bot<RPGBotConfig>
     {
+        private const int BAR_RESOLUTION = 20;
+
         /// <summary>
         /// Creates a new instance of an award manager bot, with the specified name.
         /// </summary>
@@ -19,248 +21,148 @@ namespace RPGBot
 
         }
 
-        /// <summary>
-        /// A command for setting the points an emoji is worth.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("set emoji points", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d\\-_]+:)`\\s+(?<points>-?\\d+)")]
-        private async Task SetEmojiPoints(CommandArgs<RPGBotConfig> args)
+        private async Task<bool> IsTargetInRange(DamageProfile damage, ulong userID, CommandArgs<RPGBotConfig> args)
         {
-            string emojiName = args["emojiName"];
-            int points = int.Parse(args["points"]);
-            
-            DiscordEmoji emoji;
-            try
+            foreach (var post in await args.Channel.GetMessagesBeforeAsync(args.Message.Id, damage.Range))
             {
-                emoji = DiscordEmoji.FromName(Instance.Client, emojiName);
-            }
-            catch (ArgumentException e)
-            {
-                emoji = null;
-            }
-
-            if (emoji != null)
-            {
-                args.Config.EmojiPoints[emojiName] = points;
-
-                if (emoji.RequiresColons)
+                if (post.Author.Id == userID)
                 {
-                    await args.Channel.SendMessageAsync($"<{emojiName}{emoji.Id}> is now worth {points} points.");
-                }
-                else
-                {
-                    await args.Channel.SendMessageAsync($"{emojiName} is now worth {points} points.");
+                    return true;
                 }
             }
-            else
-            {
-                await args.Channel.SendMessageAsync("That emoji doesn't seem to exist.");
-            }
+            return false;
         }
-        /// <summary>
-        /// A command for removing an emoji from the award bot tracking system.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("remove emoji points", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d-_]+:)`")]
-        private async Task RemoveEmojiPoints(CommandArgs<RPGBotConfig> args)
-        {
-            string emojiName = args["emojiName"];
-            
-            DiscordEmoji emoji;
-            try
-            {
-                emoji = DiscordEmoji.FromName(Instance.Client, emojiName);
-            }
-            catch (ArgumentException e)
-            {
-                emoji = null;
-            }
 
-            if (emoji != null)
+        [CommandAttribute("attack", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "<@!(?<targetID>\\d+)>")]
+        protected async Task Attack(CommandArgs<RPGBotConfig> args)
+        {
+            ulong targetID = ulong.Parse(args["targetID"]);
+            DiscordMember author = await args.Guild.GetMemberAsync(args.Author.Id);
+            DiscordMember target = await args.Guild.GetMemberAsync(targetID);
+
+            if (target != null)
             {
-                if (args.Config.EmojiPoints.Remove(emojiName))
+                Player attacker = args.Config.GetPlayer(author.Id);
+                Player defender = args.Config.GetPlayer(target.Id);
+
+                if (attacker.IsAlive)
                 {
-                    if (emoji.RequiresColons)
+                    if (defender.IsAlive)
                     {
-                        await args.Channel.SendMessageAsync($"I now don't associate <{emojiName}{emoji.Id}> with any points.");
+                        if (attacker.CanAttack)
+                        {
+                            if (await IsTargetInRange(attacker.Damage, target.Id, args))
+                            {
+                                DamageProfile.Result result = attacker.Damage + defender.Armor;
+                                defender.Resources.AlterHealth(-result.Damage);
+                                attacker.Resources.AlterStamina(-attacker.Damage.ManaCost);
+                                attacker.Resources.AlterStamina(-attacker.Damage.StaminaCost);
+                                
+                                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+                                builder.WithTitle($"{author.DisplayName}, {attacker.Title} attacks {target.DisplayName}, {defender.Title}!");
+                                builder.WithDescription($"Using {attacker.Damage.Description}");
+                                builder.WithColor(author.Color);
+                                
+                                if (result.Miss)
+                                {
+                                    builder.AddField("**But misses!**", "*How embarassing.*");
+                                }
+                                else
+                                {
+                                    if (result.CriticalHit)
+                                    {
+                                        builder.AddField("🗡 **Critical hit!** 🗡", $"{attacker.Damage.CriticalStrike} vs {defender.Armor.Protection}");
+                                    }
+                                    if (result.PrimaryResisted)
+                                    {
+                                        builder.AddField("🛡 **Primary stat resisted!** 🛡", $"{attacker.Damage.PrimaryType}");
+                                    }
+                                    if (result.SecondaryResisted)
+                                    {
+                                        builder.AddField("✋ **Secondary stat resisted!** ✋", $"{attacker.Damage.SecondaryType}");
+                                    }
+                                    if (result.PrimaryVulnerable)
+                                    {
+                                        builder.AddField("⚡ **Supereffective!** ⚡", $"{attacker.Damage.PrimaryType}");
+                                    }
+                                    if (result.SecondaryVulnerable)
+                                    {
+                                        builder.AddField("👊 **Effective!** 👊", $"{attacker.Damage.SecondaryType}");
+                                    }
+                                    builder.AddField($"⚔ **Damage Dealt** 🏹", $"*{result.Damage}* Health*");
+                                }
+
+                                DiscordEmbed embed = builder.Build();
+
+                                await args.Channel.SendMessageAsync(null, false, embed);
+                            }
+                            else
+                            {
+                                await args.Channel.SendMessageAsync($"{author.Mention} the target is out of range!");
+                            }    
+                        }
+                        else
+                        {
+                            await args.Channel.SendMessageAsync($"{author.Mention} you don't have enough resources to attack at the moment!");
+                        }
                     }
                     else
                     {
-                        await args.Channel.SendMessageAsync($"I now don't associate {emojiName} with any points.");
+                        await args.Channel.SendMessageAsync($"{author.Mention} the target is already dead!");
                     }
                 }
                 else
                 {
-                    await args.Channel.SendMessageAsync("I don't track that emoji anyway...");
+                    await args.Channel.SendMessageAsync($"{author.Mention} you can't attack because you're dead!");
                 }
             }
             else
             {
-                await args.Channel.SendMessageAsync("That emoji doesn't seem to exist.");
+                await args.Channel.SendMessageAsync($"{author.Mention} the target user doesn't seem to exist. Havin' a giggle?");
             }
         }
-        /// <summary>
-        /// A command for creating a title.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("create title", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"\\s+\"(?<description>[ -~]+)\"")]
-        private async Task CreateTitle(CommandArgs<RPGBotConfig> args)
+        [CommandAttribute("show purse", CommandLevel = CommandLevel.Unrestricted)]
+        protected async Task ShowPurse(CommandArgs<RPGBotConfig> args)
         {
-            string name = args["name"];
-            string description = args["description"];
-
-            args.Config.Titles[name] = new Title(description);
-
-            await args.Channel.SendMessageAsync($"The **{name}** title has been created.");
-        }
-        /// <summary>
-        /// A command for removing titles.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("remove title", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
-        private async Task RemoveTitle(CommandArgs<RPGBotConfig> args)
-        {
-            string name = args["name"];
-
-            if (args.Config.Titles.Remove(name))
-            {
-                await args.Channel.SendMessageAsync($"The **{name}** title has been removed.");
-            }
-            else
-            {
-                await args.Channel.SendMessageAsync($"The **{name}** title does not exist.");
-            }
-        }
-        /// <summary>
-        /// A command for setting the emoji requirements for a title.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("set title emoji requirement", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"\\s+`(?<emojiName>:[\\w\\d-_]+:)`\\s+(?<threshold>\\d+)")]
-        private async Task SetTitleEmojiRequirement(CommandArgs<RPGBotConfig> args)
-        {
-            string name = args["name"];
-            string emojiName = args["emojiName"];
-            int threshold = int.Parse(args["threshold"]);
-
-            if (args.Config.EmojiPoints.ContainsKey(emojiName))
-            {
-                if (args.Config.Titles.TryGetValue(name, out Title title))
-                {
-                    title.EmojiRequirements[emojiName] = threshold;
-
-                    DiscordEmoji emoji = DiscordEmoji.FromName(Instance.Client, emojiName);
-                    if (emoji.RequiresColons)
-                    {
-                        await args.Channel.SendMessageAsync($"The **{name}** title now requires **{threshold}x** <{emojiName}{emoji.Id}>.");
-                    }
-                    else
-                    {
-                        await args.Channel.SendMessageAsync($"The **{name}** title now requires **{threshold}x** {emojiName}.");
-                    }
-                }
-                else
-                {
-                    await args.Channel.SendMessageAsync($"The **{name}** title does not exist.");
-                }
-            }
-            else
-            {
-                await args.Channel.SendMessageAsync("I don't track that emoji yet, so I can't use it for titles.");
-            }
-        }
-        /// <summary>
-        /// A command for showing user statistics.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("show my stats", CommandLevel = CommandLevel.Unrestricted)]
-        private async Task ShowStats(CommandArgs<RPGBotConfig> args)
-        {
-            UserEmojiStats stats = args.Config.GetStats(args.Author.Id);
-            long totalPoints = 0;
-
             DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
+            Player player = args.Config.GetPlayer(member.Id);
 
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"Stats for **{member.DisplayName}**:\n");
+            builder.WithTitle($"**{member.DisplayName}'s Purse:**");
             builder.WithThumbnail(member.AvatarUrl);
             builder.WithColor(member.Color);
             
-            int iteration = 0;
-            foreach (var pair in args.Config.EmojiPoints)
+            foreach (var currency in player.Currency)
             {
-                int emojiCount = stats.GetCount(pair.Key);
-                int emojiPoints = pair.Value * stats.GetCount(pair.Key);
-
-                DiscordEmoji emoji = DiscordEmoji.FromName(Instance.Client, pair.Key);
-
-                if (!emoji.RequiresColons)
-                {
-                    builder.AddField($"**{emojiCount}x **{pair.Key}", $"{emojiPoints}pts", true);
-                }
-                else
-                {
-                    builder.AddField($"**{emojiCount}x **<{pair.Key}{emoji.Id}>", $"{emojiPoints}pts", true);
-                }
-
-                totalPoints += emojiPoints;
-                iteration++;
+                DiscordEmoji emoji = DiscordEmoji.FromName(args.Instance.Client, currency.Key);
+                builder.AddField(emoji.FormatName(), $"**{currency.Value}**", true);
             }
-
-            builder.WithDescription($"For a total of **{totalPoints}pts**.");
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
-        /// <summary>
-        /// Shows available titles if the user is eligible for them.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("show my titles", CommandLevel = CommandLevel.Unrestricted)]
-        private async Task ShowMyTitles(CommandArgs<RPGBotConfig> args)
+        [CommandAttribute("show resources", CommandLevel = CommandLevel.Unrestricted)]
+        protected async Task ShowResources(CommandArgs<RPGBotConfig> args)
         {
             DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
-            UserEmojiStats stats = args.Config.GetStats(member.Id);
+            Player player = args.Config.GetPlayer(member.Id);
 
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"Titles for **{member.DisplayName}**:");
+            builder.WithTitle($"**{member.DisplayName}'s Resources:**");
             builder.WithThumbnail(member.AvatarUrl);
             builder.WithColor(member.Color);
 
-            foreach (var title in args.Config.Titles)
-            {
-                if (stats.EligibleFor(title.Value))
-                {
-                    builder.AddField($"**{title.Key}**", $"{title.Value.Description}", true);
-                }
-            }
+            string healthBar = CreateBar("🟥", player.Resources.Health, player.Resources.MaxHealth);
+            builder.AddField($"Health: {player.Resources.Health}/{player.Resources.MaxHealth} ❤", healthBar);
+
+            string manaBar = CreateBar("🟦", player.Resources.Mana, player.Resources.MaxMana);
+            builder.AddField($"Mana: {player.Resources.Mana}/{player.Resources.MaxMana} 🌀", manaBar);
+
+            string staminaBar = CreateBar("🟩", player.Resources.Mana, player.Resources.MaxMana);
+            builder.AddField($"Stamina: {player.Resources.Stamina}/{player.Resources.MaxStamina} 💪", staminaBar);
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
-        /// <summary>
-        /// Shows available titles.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("show all titles", CommandLevel = CommandLevel.Unrestricted)]
-        private async Task ShowAllTitles(CommandArgs<RPGBotConfig> args)
-        {
-            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle($"All available titles:");
 
-            foreach (var title in args.Config.Titles)
-            {
-                builder.AddField($"**{title.Key}**", $"{title.Value.Description}", true);
-            }
-
-            await args.Channel.SendMessageAsync(null, false, builder.Build());
-        }
-        
         /// <summary>
         /// Fires when a user adds a reaction to a post.
         /// The user and post author cannot be bots.
@@ -273,11 +175,11 @@ namespace RPGBot
             string emojiName = args.Emoji.GetDiscordName();
             if (args.User.Id != message.Author.Id)
             {
-                UserEmojiStats userStats = args.Config.GetStats(message.Author.Id);
+                Player player = args.Config.GetPlayer(message.Author.Id);
 
-                userStats.Award(emojiName, 1);
+                player.ChangeCurrency(emojiName, 1);
             }
-            else if (args.Config.GetPoints(emojiName) > 0)
+            else
             {
                 await args.Channel.SendMessageAsync($"Nice try, {args.User.Mention}...");
             }
@@ -293,13 +195,12 @@ namespace RPGBot
             DiscordMessage message = await args.Channel.GetMessageAsync(args.Message.Id);
             if (args.User.Id != message.Author.Id)
             {
-                UserEmojiStats userStats = args.Config.GetStats(message.Author.Id);
+                Player player = args.Config.GetPlayer(message.Author.Id);
 
                 string emojiName = args.Emoji.GetDiscordName();
-                userStats.Award(emojiName, -1);
+                player.ChangeCurrency(emojiName, -1);
             }
         }
-
         /// <summary>
         /// Generates the default config file for this bot.
         /// </summary>
@@ -307,6 +208,19 @@ namespace RPGBot
         protected override RPGBotConfig CreateDefaultConfig()
         {
             return new RPGBotConfig('!');
+        }
+    
+        public static string CreateBar(string unit, int value, int maxValue)
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0 ; i < BAR_RESOLUTION; i++)
+            {
+                if (maxValue / BAR_RESOLUTION * i < value)
+                {
+                    builder.Append(unit);
+                }
+            }
+            return builder.ToString();
         }
     }
 }
