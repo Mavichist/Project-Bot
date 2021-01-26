@@ -318,12 +318,12 @@ namespace RPGBot
             if (args.Config.PVPChannels.Contains(args.Channel.Id))
             {
                 args.Config.PVPChannels.Remove(args.Channel.Id);
-                await args.Channel.SendMessageAsync("This channel is no longer a stats channel!");
+                await args.Channel.SendMessageAsync("This channel is no longer a PvP-enabled zone!");
             }
             else
             {
                 args.Config.PVPChannels.Add(args.Channel.Id);
-                await args.Channel.SendMessageAsync("This channel is now a stats channel!");
+                await args.Channel.SendMessageAsync("This channel is now a PvP-enabled zone! Watch out gamers!");
             }
         }
 
