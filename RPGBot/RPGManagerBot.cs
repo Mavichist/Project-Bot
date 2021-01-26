@@ -10,7 +10,7 @@ namespace RPGBot
     /// </summary>
     public class RPGManagerBot : BotInstance.Bot<RPGBotConfig>
     {
-        private const int BAR_RESOLUTION = 20;
+        private const int BAR_RESOLUTION = 16;
 
         /// <summary>
         /// Creates a new instance of an award manager bot, with the specified name.
@@ -174,14 +174,14 @@ namespace RPGBot
             builder.WithThumbnail(member.AvatarUrl);
             builder.WithColor(member.Color);
 
-            string healthBar = CreateBar("🟥", player.Resources.Health, player.Resources.MaxHealth);
-            builder.AddField($"Health: {player.Resources.Health}/{player.Resources.MaxHealth} ❤", healthBar);
+            string healthBar = CreateBar("🟥", "⬛", player.Resources.Health, player.Resources.MaxHealth);
+            builder.AddField($"Health: {player.Resources.Health}/{player.Resources.MaxHealth}", healthBar);
 
-            string manaBar = CreateBar("🟦", player.Resources.Mana, player.Resources.MaxMana);
-            builder.AddField($"Mana: {player.Resources.Mana}/{player.Resources.MaxMana} 🌀", manaBar);
+            string manaBar = CreateBar("🟦", "⬛", player.Resources.Mana, player.Resources.MaxMana);
+            builder.AddField($"Mana: {player.Resources.Mana}/{player.Resources.MaxMana}", manaBar);
 
-            string staminaBar = CreateBar("🟩", player.Resources.Mana, player.Resources.MaxMana);
-            builder.AddField($"Stamina: {player.Resources.Stamina}/{player.Resources.MaxStamina} 💪", staminaBar);
+            string staminaBar = CreateBar("🟩", "⬛", player.Resources.Stamina, player.Resources.MaxStamina);
+            builder.AddField($"Stamina: {player.Resources.Stamina}/{player.Resources.MaxStamina}", staminaBar);
 
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
@@ -240,7 +240,7 @@ namespace RPGBot
         /// <param name="value">The value of the statistic the bar represents.</param>
         /// <param name="maxValue">The maximum value of the statistic the bar represents.</param>
         /// <returns>A string containing the formatted bar.</returns>
-        public static string CreateBar(string unit, int value, int maxValue)
+        public static string CreateBar(string unit, string antiUnit, int value, int maxValue)
         {
             StringBuilder builder = new StringBuilder();
             for (int i = 0 ; i < BAR_RESOLUTION; i++)
@@ -248,6 +248,10 @@ namespace RPGBot
                 if (maxValue / BAR_RESOLUTION * i < value)
                 {
                     builder.Append(unit);
+                }
+                else
+                {
+                    builder.Append(antiUnit);
                 }
             }
             return builder.ToString();
