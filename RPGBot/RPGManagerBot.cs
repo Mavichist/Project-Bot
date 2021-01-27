@@ -92,7 +92,7 @@ namespace RPGBot
         private DiscordEmbed GetWeaponEmbed(string name, DamageProfile profile)
         {
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle("New weapon created!");
+            builder.WithTitle("Weapon Profile:");
             builder.WithDescription($"{name} - {profile.Description}");
 
             builder.AddField("⚔ Damage Magnitude", $"{profile.Magnitude}");
@@ -109,7 +109,7 @@ namespace RPGBot
         private DiscordEmbed GetArmorEmbed(string name, ArmorProfile profile)
     {
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle("New armor piece created!");
+            builder.WithTitle("Armor Profile:");
             builder.WithDescription($"{name} - {profile.Description}");
 
             builder.AddField("🛡 Armor Magnitude", $"{profile.Magnitude}");
@@ -268,7 +268,7 @@ namespace RPGBot
 
                 DiscordEmbed embed = GetWeaponEmbed(name, profile);
                 
-                await args.Channel.SendMessageAsync(null, false, embed);
+                await args.Channel.SendMessageAsync("A new weapon has been forged!", false, embed);
             }
             catch (JsonException e)
             {
@@ -380,7 +380,7 @@ namespace RPGBot
 
                 DiscordEmbed embed = GetArmorEmbed(name, profile);
 
-                await args.Channel.SendMessageAsync(null, false, embed);
+                await args.Channel.SendMessageAsync("A new piece of armor has been forged!", false, embed);
             }
             catch (JsonException e)
             {
