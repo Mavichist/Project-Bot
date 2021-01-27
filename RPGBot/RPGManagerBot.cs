@@ -312,6 +312,25 @@ namespace RPGBot
             await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
         /// <summary>
+        /// A command for removing a weapon from a server.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("remove weapon", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"")]
+        protected async Task RemoveWeapon(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+
+            if (args.Config.Weapons.Remove(name))
+            {
+                await args.Channel.SendMessageAsync($"I have removed **{name}** from the server.");
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync("That weapon does not exist.");
+            }
+        }
+        /// <summary>
         /// Attempts to forge an armor piece given the supplied arguments.
         /// The supplied arguments are given as a simple Json string, which should match the damage
         /// profile data structure.
@@ -376,6 +395,25 @@ namespace RPGBot
                 builder.AddField(armor.Key, armor.Value.Description);
             }
             await args.Channel.SendMessageAsync(null, false, builder.Build());
+        }
+        /// <summary>
+        /// A command for removing a weapon from a server.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("remove armor", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"")]
+        protected async Task RemoveArmor(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+
+            if (args.Config.Armors.Remove(name))
+            {
+                await args.Channel.SendMessageAsync($"I have removed **{name}** from the server.");
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync("That weapon does not exist.");
+            }
         }
         /// <summary>
         /// A command for toggling whether a channel can host stat commands.
