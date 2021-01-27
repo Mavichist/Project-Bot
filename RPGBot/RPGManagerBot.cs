@@ -331,6 +331,33 @@ namespace RPGBot
             }
         }
         /// <summary>
+        /// A command for giving a series of mentioned users weapons.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("gift weapon", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"")]
+        protected async Task GiftWeapon(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+            
+            if (args.Config.Weapons.TryGetValue(name, out DamageProfile profile))
+            {
+                foreach (DiscordUser user in args.MentionedUsers)
+                {
+                    DiscordMember member = await args.Guild.GetMemberAsync(user.Id);
+                    Player player = args.Config.GetPlayer(user.Id);
+                    
+                    player.Damage.CopyFrom(profile);
+
+                    await args.Channel.SendMessageAsync($"**{member.DisplayName}** is now armed with **{name}**, *{profile.Description}*!");
+                }
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync("A weapon with that name does not exist on this server.");
+            }
+        }
+        /// <summary>
         /// Attempts to forge an armor piece given the supplied arguments.
         /// The supplied arguments are given as a simple Json string, which should match the damage
         /// profile data structure.
@@ -413,6 +440,33 @@ namespace RPGBot
             else
             {
                 await args.Channel.SendMessageAsync("That weapon does not exist.");
+            }
+        }
+        /// <summary>
+        /// A command for giving a series of mentioned users weapons.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("gift armor", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"")]
+        protected async Task GiftArmor(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+            
+            if (args.Config.Armors.TryGetValue(name, out ArmorProfile profile))
+            {
+                foreach (DiscordUser user in args.MentionedUsers)
+                {
+                    DiscordMember member = await args.Guild.GetMemberAsync(user.Id);
+                    Player player = args.Config.GetPlayer(user.Id);
+                    
+                    player.Armor.CopyFrom(profile);
+
+                    await args.Channel.SendMessageAsync($"**{member.DisplayName}** is now armored with **{name}**, *{profile.Description}*!");
+                }
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync("An armor piece with that name does not exist on this server.");
             }
         }
         /// <summary>
