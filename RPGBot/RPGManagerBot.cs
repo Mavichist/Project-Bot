@@ -89,6 +89,38 @@ namespace RPGBot
 
             await args.Channel.SendMessageAsync(null, false, embed);
         }
+        private DiscordEmbed GetWeaponEmbed(string name, DamageProfile profile)
+        {
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle("New weapon created!");
+            builder.WithDescription($"{name} - {profile.Description}");
+
+            builder.AddField("⚔ Damage Magnitude", $"{profile.Magnitude}");
+            builder.AddField("📈 Damage Spread", $"{profile.Spread}");
+            builder.AddField("🗡 Critical Strike", $"{profile.CriticalStrike}");
+            builder.AddField("🎯 Accuracy", $"{profile.Accuracy}");
+            builder.AddField("💥 Primary Type", $"{profile.PrimaryType}");
+            builder.AddField("🔥 Secondary Type", $"{profile.SecondaryType}");
+            builder.AddField("🔵 Mana Cost", $"{profile.ManaCost}");
+            builder.AddField("🟢 Stamina Cost", $"{profile.StaminaCost}");
+
+            return builder.Build();
+        }
+        private DiscordEmbed GetArmorEmbed(string name, ArmorProfile profile)
+    {
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle("New armor piece created!");
+            builder.WithDescription($"{name} - {profile.Description}");
+
+            builder.AddField("🛡 Armor Magnitude", $"{profile.Magnitude}");
+            builder.AddField("📈 Armor Spread", $"{profile.Spread}");
+            builder.AddField("🧱 Protection", $"{profile.Protection}");
+            builder.AddField("🤸 Dodge", $"{profile.Dodge}");
+            builder.AddField("🛑 Resists", $"{profile.Resists}");
+            builder.AddField("💔 Vulnerability", $"{profile.Vulnerability}");
+
+            return builder.Build();
+        }
 
         /// <summary>
         /// A command for issuing an attack on another user.
@@ -234,25 +266,50 @@ namespace RPGBot
 
                 args.Config.Weapons[name] = profile;
 
-                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-                builder.WithTitle("New weapon created!");
-                builder.WithDescription($"{name} - {profile.Description}");
-
-                builder.AddField("⚔ Damage Magnitude", $"{profile.Magnitude}");
-                builder.AddField("📈 Damage Spread", $"{profile.Spread}");
-                builder.AddField("🗡 Critical Strike", $"{profile.CriticalStrike}");
-                builder.AddField("🎯 Accuracy", $"{profile.Accuracy}");
-                builder.AddField("💥 Primary Type", $"{profile.PrimaryType}");
-                builder.AddField("🔥 Secondary Type", $"{profile.SecondaryType}");
-                builder.AddField("🔵 Mana Cost", $"{profile.ManaCost}");
-                builder.AddField("🟢 Stamina Cost", $"{profile.StaminaCost}");
-
-                await args.Channel.SendMessageAsync(null, false, builder.Build());
+                DiscordEmbed embed = GetWeaponEmbed(name, profile);
+                
+                await args.Channel.SendMessageAsync(null, false, embed);
             }
             catch (JsonException e)
             {
                 await args.Channel.SendMessageAsync("The Json entered wasn't valid.");
             }
+        }
+        /// <summary>
+        /// A command for showing a specific weapon.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("show weapon", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "\"(?<name>.+)\"")]
+        protected async Task ShowWeapon(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+
+            if (args.Config.Weapons.TryGetValue(name, out DamageProfile profile))
+            {
+                DiscordEmbed embed = GetWeaponEmbed(name, profile);
+                await args.Channel.SendMessageAsync(null, false, embed);
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync("That weapon doesn't exist.");
+            }
+        }
+        /// <summary>
+        /// A command for listing all weapons available on a server.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("show all weapons", CommandLevel = CommandLevel.Unrestricted)]
+        protected async Task ShowAllWeapons(CommandArgs<RPGBotConfig> args)
+        {
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle("All weapons on this server:");
+            foreach (var weapon in args.Config.Weapons)
+            {
+                builder.AddField(weapon.Key, weapon.Value.Description);
+            }
+            await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
         /// <summary>
         /// Attempts to forge an armor piece given the supplied arguments.
@@ -275,23 +332,50 @@ namespace RPGBot
 
                 args.Config.Armors[name] = profile;
 
-                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-                builder.WithTitle("New armor piece created!");
-                builder.WithDescription($"{name} - {profile.Description}");
+                DiscordEmbed embed = GetArmorEmbed(name, profile);
 
-                builder.AddField("🛡 Armor Magnitude", $"{profile.Magnitude}");
-                builder.AddField("📈 Armor Spread", $"{profile.Spread}");
-                builder.AddField("🧱 Protection", $"{profile.Protection}");
-                builder.AddField("🤸 Dodge", $"{profile.Dodge}");
-                builder.AddField("🛑 Resists", $"{profile.Resists}");
-                builder.AddField("💔 Vulnerability", $"{profile.Vulnerability}");
-
-                await args.Channel.SendMessageAsync(null, false, builder.Build());
+                await args.Channel.SendMessageAsync(null, false, embed);
             }
             catch (JsonException e)
             {
                 await args.Channel.SendMessageAsync("The Json entered wasn't valid.");
             }
+        }
+        /// <summary>
+        /// A command for showing a specific piece of armor.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("show armor", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "\"(?<name>.+)\"")]
+        protected async Task ShowArmor(CommandArgs<RPGBotConfig> args)
+        {
+            string name = args["name"];
+
+            if (args.Config.Armors.TryGetValue(name, out ArmorProfile profile))
+            {
+                DiscordEmbed embed = GetArmorEmbed(name, profile);
+                await args.Channel.SendMessageAsync(null, false, embed);
+            }
+            else
+            {
+                await args.Channel.SendMessageAsync("That weapon doesn't exist.");
+            }
+        }
+        /// <summary>
+        /// A command for listing all armor available on a server.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("show all armor", CommandLevel = CommandLevel.Unrestricted)]
+        protected async Task ShowAllArmor(CommandArgs<RPGBotConfig> args)
+        {
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle("All armor on this server:");
+            foreach (var armor in args.Config.Armors)
+            {
+                builder.AddField(armor.Key, armor.Value.Description);
+            }
+            await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
         /// <summary>
         /// A command for toggling whether a channel can host stat commands.
