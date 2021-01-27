@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BotScaffold;
 using DSharpPlus.Entities;
@@ -214,79 +215,83 @@ namespace RPGBot
         }
         /// <summary>
         /// Attempts to forge a weapon given the supplied arguments.
+        /// The supplied arguments are given as a simple Json string, which should match the damage
+        /// profile data structure.
+        /// Normally I wouldn't use serialized data as input, but as far as I'm aware this particular
+        /// implementation is safe.
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("forge weapon", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"\\s+\"(?<description>.+)\"\\s+(?<arguments>.*)")]
+        [CommandAttribute("forge weapon", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"\\s+```(?<json>.*)```")]
         protected async Task ForgeWeapon(CommandArgs<RPGBotConfig> args)
         {
             string name = args["name"];
-            string description = args["description"];
-            string arguments = args["arguments"];
+            string json = args["json"];
 
-            DamageProfile profile = new DamageProfile();
-            profile.Description = description;
-            profile.Magnitude = arguments.ExtractInt("magnitude\\((?<value>\\d+)\\)") ?? profile.Magnitude;
-            profile.Spread = arguments.ExtractInt("spread\\((?<value>\\d+)\\)") ?? profile.Spread;
-            profile.CriticalStrike = arguments.ExtractInt("crit\\((?<value>\\d+)\\)") ?? profile.CriticalStrike;
-            profile.Accuracy = arguments.ExtractInt("accuracy\\((?<value>\\d+)\\)") ?? profile.Accuracy;
-            profile.PrimaryType = arguments.ExtractEnum<DamageType>("primary\\((?<value>[a-zA-Z]+)\\)") ?? profile.PrimaryType;
-            profile.SecondaryType = arguments.ExtractEnum<DamageType>("secondary\\((?<value>[a-zA-Z]+)\\)") ?? profile.PrimaryType;
-            profile.ManaCost = arguments.ExtractInt("mana\\((?<value>\\d+)\\)") ?? profile.ManaCost;
-            profile.StaminaCost = arguments.ExtractInt("stamina\\((?<value>\\d+)\\)") ?? profile.StaminaCost;
+            try
+            {
+                DamageProfile profile = JsonSerializer.Deserialize<DamageProfile>(json);
 
-            args.Config.Weapons[name] = profile;
+                args.Config.Weapons[name] = profile;
 
-            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle("New weapon created!");
-            builder.WithDescription($"{name} - {profile.Description}");
+                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+                builder.WithTitle("New weapon created!");
+                builder.WithDescription($"{name} - {profile.Description}");
 
-            builder.AddField("⚔ Damage Magnitude", $"{profile.Magnitude}");
-            builder.AddField("📈 Damage Spread", $"{profile.Spread}");
-            builder.AddField("🗡 Critical Strike", $"{profile.CriticalStrike}");
-            builder.AddField("🎯 Accuracy", $"{profile.Accuracy}");
-            builder.AddField("💥 Primary Type", $"{profile.PrimaryType}");
-            builder.AddField("🔥 Secondary Type", $"{profile.SecondaryType}");
-            builder.AddField("🔵 Mana Cost", $"{profile.ManaCost}");
-            builder.AddField("🟢 Stamina Cost", $"{profile.StaminaCost}");
+                builder.AddField("⚔ Damage Magnitude", $"{profile.Magnitude}");
+                builder.AddField("📈 Damage Spread", $"{profile.Spread}");
+                builder.AddField("🗡 Critical Strike", $"{profile.CriticalStrike}");
+                builder.AddField("🎯 Accuracy", $"{profile.Accuracy}");
+                builder.AddField("💥 Primary Type", $"{profile.PrimaryType}");
+                builder.AddField("🔥 Secondary Type", $"{profile.SecondaryType}");
+                builder.AddField("🔵 Mana Cost", $"{profile.ManaCost}");
+                builder.AddField("🟢 Stamina Cost", $"{profile.StaminaCost}");
 
-            await args.Channel.SendMessageAsync(null, false, builder.Build());
+                await args.Channel.SendMessageAsync(null, false, builder.Build());
+            }
+            catch (JsonException e)
+            {
+                await args.Channel.SendMessageAsync("The Json entered wasn't valid.");
+            }
         }
         /// <summary>
         /// Attempts to forge an armor piece given the supplied arguments.
+        /// The supplied arguments are given as a simple Json string, which should match the damage
+        /// profile data structure.
+        /// Normally I wouldn't use serialized data as input, but as far as I'm aware this particular
+        /// implementation is safe.
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("forge armor", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"\\s+\"(?<description>.+)\"\\s+(?<arguments>.*)")]
+        [CommandAttribute("forge armor", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>.+)\"\\s+```(?<json>.*)```")]
         protected async Task ForgeArmor(CommandArgs<RPGBotConfig> args)
         {
             string name = args["name"];
-            string description = args["description"];
-            string arguments = args["arguments"];
+            string json = args["json"];
 
-            ArmorProfile profile = new ArmorProfile();
-            profile.Description = description;
-            profile.Magnitude = arguments.ExtractInt("magnitude\\((?<value>\\d+)\\)") ?? profile.Magnitude;
-            profile.Spread = arguments.ExtractInt("spread\\((?<value>\\d+)\\)") ?? profile.Spread;
-            profile.Protection = arguments.ExtractInt("protection\\((?<value>\\d+)\\)") ?? profile.Protection;
-            profile.Dodge = arguments.ExtractInt("dodge\\((?<value>\\d+)\\)") ?? profile.Dodge;
-            profile.Resists = arguments.ExtractEnum<DamageType>("resists\\((?<value>[a-zA-Z]+)\\)") ?? profile.Resists;
-            profile.Vulnerability = arguments.ExtractEnum<DamageType>("vulnerability\\((?<value>[a-zA-Z]+)\\)") ?? profile.Vulnerability;
+            try
+            {
+                ArmorProfile profile = JsonSerializer.Deserialize<ArmorProfile>(json);
 
-            args.Config.Armors[name] = profile;
+                args.Config.Armors[name] = profile;
 
-            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-            builder.WithTitle("New armor piece created!");
-            builder.WithDescription($"{name} - {profile.Description}");
+                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+                builder.WithTitle("New armor piece created!");
+                builder.WithDescription($"{name} - {profile.Description}");
 
-            builder.AddField("🛡 Armor Magnitude", $"{profile.Magnitude}");
-            builder.AddField("📈 Armor Spread", $"{profile.Spread}");
-            builder.AddField("🧱 Protection", $"{profile.Protection}");
-            builder.AddField("🤸 Dodge", $"{profile.Dodge}");
-            builder.AddField("🛑 Resists", $"{profile.Resists}");
-            builder.AddField("💔 Vulnerability", $"{profile.Vulnerability}");
+                builder.AddField("🛡 Armor Magnitude", $"{profile.Magnitude}");
+                builder.AddField("📈 Armor Spread", $"{profile.Spread}");
+                builder.AddField("🧱 Protection", $"{profile.Protection}");
+                builder.AddField("🤸 Dodge", $"{profile.Dodge}");
+                builder.AddField("🛑 Resists", $"{profile.Resists}");
+                builder.AddField("💔 Vulnerability", $"{profile.Vulnerability}");
 
-            await args.Channel.SendMessageAsync(null, false, builder.Build());
+                await args.Channel.SendMessageAsync(null, false, builder.Build());
+            }
+            catch (JsonException e)
+            {
+                await args.Channel.SendMessageAsync("The Json entered wasn't valid.");
+            }
         }
         /// <summary>
         /// A command for toggling whether a channel can host stat commands.

@@ -24,8 +24,8 @@ namespace HangoutBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("hangout add", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
-        private async Task AddHangout(CommandArgs<HangoutBotConfig> args)
+        [CommandAttribute("create hangout", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
+        private async Task CreateHangout(CommandArgs<HangoutBotConfig> args)
         {
             string name = args["name"];
 
@@ -69,7 +69,7 @@ namespace HangoutBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("hangout remove", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
+        [CommandAttribute("remove hangout", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
         private async Task RemoveHangout(CommandArgs<HangoutBotConfig> args)
         {
             string name = args["name"];
@@ -96,7 +96,7 @@ namespace HangoutBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
-        [CommandAttribute("hangout set category", CommandLevel = CommandLevel.Admin, ParameterRegex = "<#(?<channelID>\\d+)>")]
+        [CommandAttribute("set hangout category", CommandLevel = CommandLevel.Admin, ParameterRegex = "<#(?<channelID>\\d+)>")]
         private async Task SetHangoutCategory(CommandArgs<HangoutBotConfig> args)
         {
             ulong categoryID = ulong.Parse(args["channelID"]);

@@ -186,10 +186,12 @@ namespace RPGBot
                     modifier += 1f;
                 }
                 
-                int damageMagnitude = damage.Magnitude + random.Next(-damage.Spread, damage.Spread + 1);
+                int damageSpread = Math.Abs(damage.Spread);
+                int damageMagnitude = damage.Magnitude + random.Next(-damageSpread, damageSpread + 1);
                 damageMagnitude = (int)MathF.Round(damageMagnitude * modifier);
 
-                int armorMagnitude = armor.Magnitude + random.Next(-armor.Spread, armor.Spread + 1);
+                int armorSpread = Math.Abs(damage.Spread);
+                int armorMagnitude = armor.Magnitude + random.Next(-armorSpread, armorSpread + 1);
 
                 result.Damage = Math.Max(damageMagnitude - armorMagnitude, 0);
             }
