@@ -386,6 +386,24 @@ namespace BotScaffold
             {
 
             }
+            /// <summary>
+            /// A command for showing help for a given bot.
+            /// This command is endemic to all bots and will generate one message for every bot that
+            /// is attached to an instance.
+            /// </summary>
+            /// <param name="args">The context for the message invoking the command.</param>
+            /// <returns>An awaitable task for the command.</returns>
+            [CommandAttribute("help", CommandLevel = CommandLevel.Unrestricted)]
+            protected async Task Help(CommandArgs<TConfig> args)
+            {
+                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+                builder.WithTitle($"Command List for {Name}:");
+                foreach (Command<TConfig> command in Commands)
+                {
+                    builder.AddField($"`{args.Config.Indicator}{command.CommandString}`", $"```{command.ParameterRegex}```");
+                }
+                await args.Channel.SendMessageAsync(null, false, builder.Build());
+            }
 
             /// <summary>
             /// Attaches this bot to an instance so it can run.
