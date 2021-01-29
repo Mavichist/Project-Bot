@@ -20,23 +20,14 @@ namespace RPGBot
             private set;
         } = new Dictionary<ulong, Player>();
         /// <summary>
-        /// A set of available weapons in the game.
+        /// A set of available item prototypes in the game.
         /// </summary>
         [JsonInclude]
-        public Dictionary<string, DamageProfile> Weapons
+        public Dictionary<string, Item> Items
         {
             get;
             private set;
-        } = new Dictionary<string, DamageProfile>();
-        /// <summary>
-        /// A set of available armors.
-        /// </summary>
-        [JsonInclude]
-        public Dictionary<string, ArmorProfile> Armors
-        {
-            get;
-            private set;
-        } = new Dictionary<string, ArmorProfile>();
+        } = new Dictionary<string, Item>();
         /// <summary>
         /// Specifies the set of channel IDs of stat-related commands to reduce spam.
         /// </summary>

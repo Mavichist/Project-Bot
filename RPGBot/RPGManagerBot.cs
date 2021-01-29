@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BotScaffold;
 using DSharpPlus.Entities;
@@ -51,6 +52,37 @@ namespace RPGBot
 
                 await args.Channel.SendMessageAsync(null, false, builder.Build());
             }
+        }
+        /// <summary>
+        /// A command for displaying the inventory of a specific user.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("show inventory", CommandLevel = CommandLevel.Unrestricted)]
+        protected async Task ShowInventory(CommandArgs<RPGBotConfig> args)
+        {
+            DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
+            Player player = args.Config.GetPlayer(member.Id);
+
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+            builder.WithTitle($"{member.DisplayName}'s Inventory:");
+            builder.WithThumbnail(member.AvatarUrl);
+            builder.WithColor(member.Color);
+
+            for (int i = 0; i < player.Inventory.Length; i++)
+            {
+                Item? item = player.Inventory[i];
+                if (item.HasValue)
+                {
+                    builder.AddField($"Item slot {i}:", $"*{item.Value.Name}*", true);
+                }
+                else
+                {
+                    builder.AddField($"Item slot {i}:", "*Empty.*", true);
+                }
+            }
+
+            await args.Channel.SendMessageAsync(null, false, builder.Build());
         }
         /// <summary>
         /// A command for showing the user's health, mana and stamina.
@@ -121,6 +153,35 @@ namespace RPGBot
             {
                 args.Config.PVPChannels.Add(args.Channel.Id);
                 await args.Channel.SendMessageAsync("This channel is now a PvP-enabled zone! Watch out gamers!");
+            }
+        }
+        /// <summary>
+        /// Attempts to forge an item given the supplied arguments.
+        /// The supplied arguments are given as a simple Json string, which should match the damage
+        /// profile data structure.
+        /// Normally I wouldn't use serialized data as input, but as far as I'm aware this particular
+        /// implementation is safe.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        /// <returns>A task for completing the command.</returns>
+        [CommandAttribute("forge item", CommandLevel = CommandLevel.Admin, ParameterRegex = "```(?<json>[\\w\\W\\n]*)```")]
+        protected async Task ForgeItem(CommandArgs<RPGBotConfig> args)
+        {
+            string json = args["json"];
+
+            try
+            {
+                Item item = JsonSerializer.Deserialize<Item>(json);
+
+                args.Config.Items[item.Name] = item;
+
+                DiscordEmbed embed = item.CreateEmbed();
+
+                await args.Channel.SendMessageAsync("A new item has been forged!", false, embed);
+            }
+            catch (JsonException e)
+            {
+                await args.Channel.SendMessageAsync("The Json entered wasn't valid.");
             }
         }
 

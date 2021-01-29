@@ -28,24 +28,6 @@ namespace RPGBot
             set;
         } = "Adventurer";
         /// <summary>
-        /// The damage dealt by this player's weapon.
-        /// </summary>
-        [JsonInclude]
-        public DamageProfile Damage
-        {
-            get;
-            private set;
-        } = new DamageProfile();
-        /// <summary>
-        /// The defences of the armor this player is wearing.
-        /// </summary>
-        [JsonInclude]
-        public ArmorProfile Armor
-        {
-            get;
-            private set;
-        } = new ArmorProfile();
-        /// <summary>
         /// The personal resources of the player, such as mana, health and stamina.
         /// </summary>
         [JsonInclude]
@@ -57,6 +39,7 @@ namespace RPGBot
         /// <summary>
         /// Indicates whether the player is alive (their health is above 0).
         /// </summary>
+        [JsonIgnore]
         public bool IsAlive
         {
             get
@@ -67,15 +50,67 @@ namespace RPGBot
         /// <summary>
         /// Indicates whether the player can attack (they are alive and have the mana/stamina to do so).
         /// </summary>
+        [JsonIgnore]
         public bool CanAttack
         {
             get
             {
                 return IsAlive &&
-                    Resources.Mana >= Damage.ManaCost && 
-                    Resources.Stamina >= Damage.StaminaCost;
+                    Resources.Mana >= Weapon.ManaCost && 
+                    Resources.Stamina >= Weapon.StaminaCost;
             }
         }
+        /// <summary>
+        /// The inventory index of this player's weapon.
+        /// If the item at this position in the inventory isn't a weapon, the player will use fists.
+        /// </summary>
+        [JsonInclude]
+        public int WeaponIndex
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// The damage dealt by this player's weapon.
+        /// </summary>
+        [JsonIgnore]
+        public DamageProfile Weapon
+        {
+            get
+            {
+                return GetItem(WeaponIndex)?.Damage ?? DamageProfile.Fists;
+            }
+        }
+        /// <summary>
+        /// The inventory index of this player's armor.
+        /// If the item at this position in the inventory isn't armor, the player will use rags.
+        /// </summary>
+        [JsonInclude]
+        public int ArmorIndex
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// The defences of the armor this player is wearing.
+        /// </summary>
+        [JsonIgnore]
+        public ArmorProfile Armor
+        {
+            get
+            {
+                return GetItem(ArmorIndex)?.Armor ?? ArmorProfile.Rags;
+            }
+        }
+        /// <summary>
+        /// Contains a list of all the player's items.
+        /// </summary>
+        [JsonInclude]
+        public Item?[] Inventory
+        {
+            get;
+            private set;
+        } = new Item?[8];
 
         /// <summary>
         /// Retrieves the number of times the bot has witnessed a reaction to the user's posts with
@@ -132,6 +167,51 @@ namespace RPGBot
         public void SetCurrency(string emojiName, int count)
         {
             Currency[emojiName] = Math.Max(count, 0);
+        }
+        /// <summary>
+        /// Retrieves an item from the user's inventory at the specified location.
+        /// If the index is out of bounds, null is returned.
+        /// </summary>
+        /// <param name="inventoryIndex">The index within the player's inventory.</param>
+        /// <returns>The item at the specified location in the inventory.</returns>
+        public Item? GetItem(int inventoryIndex)
+        {
+            if (inventoryIndex >= 0 && inventoryIndex < Inventory.Length)
+            {
+                return Inventory[inventoryIndex];
+            }
+            else
+            {
+                return null;
+            }
+        }
+        /// <summary>
+        /// Resizes the player's inventory and returns any items that couldn't fit in the new one.
+        /// </summary>
+        /// <param name="newSize">The size of the player's new inventory.</param>
+        /// <returns>A collection of items that were removed due to space restrictions.</returns>
+        public IEnumerable<Item> ResizeInventory(int newSize)
+        {
+            // Create a stack and fill it with items in the current inventory.
+            Stack<Item> overflow = new Stack<Item>();
+            for (int i = 0; i < Inventory.Length; i++)
+            {
+                if (Inventory[i].HasValue)
+                {
+                    overflow.Push(Inventory[i].Value);
+                }
+            }
+            // Create the new inventory and copy over all the items in the stack.
+            Inventory = new Item?[newSize];
+            for (int i = 0; i < newSize && overflow.Count > 0; i++)
+            {
+                Inventory[i] = overflow.Pop();
+            }
+            // Yield every item left in the stack as a collection.
+            foreach (Item i in overflow)
+            {
+                yield return i;
+            }
         }
     }
 }

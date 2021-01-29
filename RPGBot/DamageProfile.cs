@@ -24,8 +24,27 @@ namespace RPGBot
     /// <summary>
     /// Represents the damage done by a weapon and peripheral information like attack range.
     /// </summary>
-    public class DamageProfile
+    public struct DamageProfile
     {
+        public static DamageProfile Fists
+        {
+            get
+            {
+                return new DamageProfile()
+                {
+                    Description = "bare fists",
+                    Magnitude = 5,
+                    Spread = 3,
+                    CriticalStrike = 1,
+                    Accuracy = 4,
+                    PrimaryType = DamageType.Bludgeoning,
+                    SecondaryType = DamageType.None,
+                    StaminaCost = 5,
+                    ManaCost = 0,
+                    Range = 2
+                };
+            }
+        }
         private static Random random = new Random();
 
         /// <summary>
@@ -36,7 +55,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = "Fists";
+        }
         /// <summary>
         /// The total magnitude of this weapon's offences.
         /// </summary>
@@ -45,7 +64,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = 3;
+        }
         /// <summary>
         /// Indicates the point spread of the weapon's attack damage.
         /// Higher values indicate an unpredictable weapon.
@@ -55,7 +74,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = 2;
+        }
         /// <summary>
         /// Represents the likelihood of a critical strike.
         /// </summary>
@@ -64,7 +83,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = 1;
+        }
         /// <summary>
         /// Represents the likelihood that attacks with this weapon will hit.
         /// </summary>
@@ -73,7 +92,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = 4;
+        }
         /// <summary>
         /// The primary damage type dealt by this weapon.
         /// </summary>
@@ -82,7 +101,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = DamageType.Bludgeoning;
+        }
         /// <summary>
         /// The secondary damage type dealt by this weapon.
         /// </summary>
@@ -91,7 +110,16 @@ namespace RPGBot
         {
             get;
             set;
-        } = DamageType.None;
+        }
+        /// <summary>
+        /// The health cost for using this weapon.
+        /// </summary>
+        [JsonInclude]
+        public int HealthCost
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// The stamina cost for using this weapon.
         /// </summary>
@@ -100,7 +128,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = 5;
+        }
         /// <summary>
         /// The mana cost for using this weapon.
         /// </summary>
@@ -109,7 +137,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = 0;
+        }
         /// <summary>
         /// The maximum number of posts a target can be from the attack command message.
         /// Attacks are considered to occur within a channel.
@@ -119,27 +147,8 @@ namespace RPGBot
         {
             get;
             set;
-        } = 2;
-
-        /// <summary>
-        /// This is the preferred way of copying the stats of a damage profile to a player because
-        /// it guarantees immutability even though the class itself is not immutable.
-        /// </summary>
-        /// <param name="other">The other damage profile to copy from.</param>
-        public void CopyFrom(DamageProfile other)
-        {
-            Description = other.Description;
-            Magnitude = other.Magnitude;
-            Spread = other.Spread;
-            CriticalStrike = other.CriticalStrike;
-            Accuracy = other.Accuracy;
-            PrimaryType = other.PrimaryType;
-            SecondaryType = other.SecondaryType;
-            StaminaCost = other.StaminaCost;
-            ManaCost = other.ManaCost;
-            Range = other.Range;
         }
-        
+
         /// <summary>
         /// Calculates the resultant damage for an attack using a damage and armor profile.
         /// </summary>

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace RPGBot
@@ -6,8 +5,25 @@ namespace RPGBot
     /// <summary>
     /// Represents the clothing and armor worn by a player.
     /// </summary>
-    public class ArmorProfile
+    public struct ArmorProfile
     {
+        public static ArmorProfile Rags
+        {
+            get
+            {
+                return new ArmorProfile()
+                {
+                    Description = "filthy rags",
+                    Magnitude = 4,
+                    Spread = 2,
+                    Protection = 4,
+                    Dodge = 1,
+                    Resists = DamageType.None,
+                    Vulnerability = DamageType.Fire
+                };
+            }
+        }
+
         /// <summary>
         /// A description of the armor.
         /// </summary>
@@ -16,7 +32,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = "Rags";
+        }
         /// <summary>
         /// The total magnitude of this armor's defences.
         /// </summary>
@@ -44,7 +60,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = 19;
+        }
         /// <summary>
         /// Indicates how likely the wearer is to dodge an attack.
         /// </summary>
@@ -53,7 +69,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = 1;
+        }
         /// <summary>
         /// A list of damage types that this armor resists.
         /// </summary>
@@ -62,7 +78,7 @@ namespace RPGBot
         {
             get;
             set;
-        } = DamageType.None;
+        }
         /// <summary>
         /// A list of damage types this armor is vulnerable to.
         /// </summary>
@@ -71,22 +87,6 @@ namespace RPGBot
         {
             get;
             set;
-        } = DamageType.None;
-        
-        /// <summary>
-        /// This is the preferred way of copying the stats of an armor profile to a player because
-        /// it guarantees immutability even though the class itself is not immutable.
-        /// </summary>
-        /// <param name="other">The other armor profile to copy from.</param>
-        public void CopyFrom(ArmorProfile other)
-        {
-            Description = other.Description;
-            Magnitude = other.Magnitude;
-            Spread = other.Spread;
-            Protection = other.Protection;
-            Dodge = other.Dodge;
-            Resists = other.Resists;
-            Vulnerability = other.Vulnerability;
         }
     }
 }

@@ -45,6 +45,9 @@ namespace RoleBot
         private async Task Register(CommandArgs<RoleBotConfig> args)
         {
             string emojiName = args["emojiName"];
+
+            DiscordEmoji emoji = DiscordEmoji.FromName(Instance.Client, emojiName);
+            emojiName = emoji.GetDiscordName();
             
             if (emojiName != null)
             {
