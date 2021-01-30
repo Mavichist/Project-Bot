@@ -124,8 +124,8 @@ namespace BotScaffold
             int comp = CommandString.Length - other.CommandString.Length;
             if (comp == 0)
             {
-                comp += ParameterRegex is null ? 0 : 1;
-                comp -= other.ParameterRegex is null ? 0 : 1;
+                comp -= ParameterRegex is null ? 0 : 1;
+                comp += other.ParameterRegex is null ? 0 : 1;
             }
             return comp;
         }

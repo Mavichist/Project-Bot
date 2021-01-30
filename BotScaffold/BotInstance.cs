@@ -259,7 +259,7 @@ namespace BotScaffold
                             }
                             else if (state == CommandState.ParameterError)
                             {
-                                await args.Channel.SendMessageAsync($"Incorrectly formatted parameters. Should match `{c.ParameterRegex}`");
+                                await args.Channel.SendMessageAsync($"Incorrectly formatted parameters. Should match ```{c.ParameterRegex}```");
                             }
                         }
                     }
@@ -395,7 +395,7 @@ namespace BotScaffold
             /// <param name="args">The context for the message invoking the command.</param>
             /// <returns>An awaitable task for the command.</returns>
             [Usage("Using this command will generate help information for my commands.")]
-            [Command("help", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<botName>\\w+)")]
+            [Command("help for", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<botName>\\w+)")]
             protected async Task BotHelp(CommandArgs<TConfig> args)
             {
                 if (args.Channel.Id == args.Config.HelpChannelID && Name == args["botName"])
@@ -441,7 +441,7 @@ namespace BotScaffold
             {
                 if (args.Channel.Id == args.Config.HelpChannelID)
                 {
-                    await args.Channel.SendMessageAsync($"`{args.Config.Indicator}help {Name}`");
+                    await args.Channel.SendMessageAsync($"`{args.Config.Indicator}help for {Name}`");
                 }
             }
             /// <summary>
