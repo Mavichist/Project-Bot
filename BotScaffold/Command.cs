@@ -146,26 +146,30 @@ namespace BotScaffold
             foreach (MethodInfo m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 CommandAttribute attr = m.GetCustomAttribute<CommandAttribute>();
-                UsageAttribute usage = m.GetCustomAttribute<UsageAttribute>();
-                CommandCallback<TConfig> callback = m.CreateDelegate<CommandCallback<TConfig>>(o);
 
-                Command<TConfig> command = new Command<TConfig>()
+                if (attr != null)
                 {
-                    CommandString = attr.CommandString,
-                    ParameterRegex = attr.ParameterRegex,
-                    Callback = callback,
-                    CommandLevel = attr.CommandLevel,
-                    UsageInformation = usage.UsageInfo ?? "No information available."
-                };
+                    UsageAttribute usage = m.GetCustomAttribute<UsageAttribute>();
+                    CommandCallback<TConfig> callback = m.CreateDelegate<CommandCallback<TConfig>>(o);
 
-                foreach (var argument in m.GetCustomAttributes<ArgumentAttribute>())
-                {
-                    command.ArgumentInformation.Add($"{argument.Name}: {argument.Info}");
+                    Command<TConfig> command = new Command<TConfig>()
+                    {
+                        CommandString = attr.CommandString,
+                        ParameterRegex = attr.ParameterRegex,
+                        Callback = callback,
+                        CommandLevel = attr.CommandLevel,
+                        UsageInformation = usage?.UsageInfo ?? "No information available."
+                    };
+
+                    foreach (var argument in m.GetCustomAttributes<ArgumentAttribute>())
+                    {
+                        command.ArgumentInformation.Add($"{argument.Name}: {argument.Info}");
+                    }
+
+                    commands.Add(command);
+
+                    Console.WriteLine($"Added \"{attr.CommandString}\" to {o}.");
                 }
-
-                commands.Add(command);
-
-                Console.WriteLine($"Added \"{attr.CommandString}\" to {o}.");
             }
 
             commands.Sort();
