@@ -394,7 +394,7 @@ namespace BotScaffold
             /// </summary>
             /// <param name="args">The context for the message invoking the command.</param>
             /// <returns>An awaitable task for the command.</returns>
-            [UsageAttribute("Using this command will generate help information for every bot currently running.")]
+            [UsageAttribute("Using this command will generate help information for my commands.")]
             [CommandAttribute("help", CommandLevel = CommandLevel.Unrestricted)]
             protected async Task Help(CommandArgs<TConfig> args)
             {
@@ -407,19 +407,20 @@ namespace BotScaffold
 
                     StringBuilder sb = new StringBuilder();
 
-                    sb.Append($"Usage information: *{command.UsageInformation}*\n");
+                    sb.Append($"- **Usage:** *{command.UsageInformation}*\n");
+                    sb.Append($"- **Level:** *{command.CommandLevel}*\n");
 
-                    if (command.ArgumentInformation.Count > 0)
+                    if (command.ArgumentInfo.Count > 0)
                     {
-                        sb.Append("Arguments:\n");
-                        foreach (string argumentInfo in command.ArgumentInformation)
+                        sb.Append("- **Arguments:**\n");
+                        foreach (var argumentInfo in command.ArgumentInfo)
                         {
-                            sb.Append($"{argumentInfo}\n");
+                            sb.Append($"- + **{argumentInfo.Name}**: *{argumentInfo.Info}*\n");
                         }
                     }
                     else
                     {
-                        sb.Append("*Takes no arguments*\n");
+                        sb.Append("- **Takes no arguments**\n");
                     }
 
                     builder.AddField(fieldName, sb.ToString());

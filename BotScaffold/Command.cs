@@ -59,11 +59,11 @@ namespace BotScaffold
         /// <summary>
         /// Contains information on each argument the command takes.
         /// </summary>
-        public List<string> ArgumentInformation
+        public List<ArgumentInfo> ArgumentInfo
         {
             get;
             private set;
-        } = new List<string>();
+        } = new List<ArgumentInfo>();
 
         /// <summary>
         /// Attempts to invoke this command given the current user string.
@@ -163,7 +163,7 @@ namespace BotScaffold
 
                     foreach (var argument in m.GetCustomAttributes<ArgumentAttribute>())
                     {
-                        command.ArgumentInformation.Add($"{argument.Name}: {argument.Info}");
+                        command.ArgumentInfo.Add(new ArgumentInfo(argument.Name, argument.Info));
                     }
 
                     commands.Add(command);
