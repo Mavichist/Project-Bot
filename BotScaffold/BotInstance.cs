@@ -396,9 +396,9 @@ namespace BotScaffold
             /// <returns>An awaitable task for the command.</returns>
             [Usage("Using this command will generate help information for my commands.")]
             [Command("help", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<botName>\\w+)")]
-            protected async Task Help(CommandArgs<TConfig> args)
+            protected async Task BotHelp(CommandArgs<TConfig> args)
             {
-                if (args.Channel.Id == args.Config.HelpChannelID)
+                if (args.Channel.Id == args.Config.HelpChannelID && Name == args["botName"])
                 {
                     DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
                     builder.WithTitle($"Command List for {Name}:");
@@ -428,6 +428,20 @@ namespace BotScaffold
                         builder.AddField(fieldName, sb.ToString());
                     }
                     await args.Channel.SendMessageAsync(null, false, builder.Build());
+                }
+            }
+            /// <summary>
+            /// A command for polling for bot names to be used with the help command above.
+            /// </summary>
+            /// <param name="args">The context for the message invoking the command.</param>
+            /// <returns>An awaitable task for the command.</returns>
+            [Usage("Using this command will list possible help.")]
+            [Command("help", CommandLevel = CommandLevel.Unrestricted)]
+            protected async Task Help(CommandArgs<TConfig> args)
+            {
+                if (args.Channel.Id == args.Config.HelpChannelID)
+                {
+                    await args.Channel.SendMessageAsync($"`{args.Config.Indicator}help {Name}`");
                 }
             }
             /// <summary>
