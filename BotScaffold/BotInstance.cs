@@ -431,7 +431,6 @@ namespace BotScaffold
                     DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
 
                     await member.SendMessageAsync(null, false, builder.Build());
-                    await args.Channel.SendMessageAsync($"I have sent you some help, {member.Mention}!");
                 }
             }
             /// <summary>
