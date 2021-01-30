@@ -44,7 +44,7 @@ namespace BotScaffold
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [Usage("Registers roles as administrative. Users with administrative roles can use admin-restricted commands.")]
-        [Argument("Roles", "All mentioned roles accompanying this command will be deregistered.")]
+        [Argument("Roles", "All mentioned roles accompanying this command will be registered as admin.")]
         [Command("register admin role", CommandLevel = CommandLevel.Owner)]
         protected async Task RegisterAdminRole(CommandArgs<BotConfig> args)
         {

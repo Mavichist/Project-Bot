@@ -24,6 +24,8 @@ namespace HangoutBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
+        [Usage("This command creates a hangout channel with the specified name. Member roles are created at the same time.")]
+        [Argument("Hangout Name", "The name of the hangout channel to create.")]
         [CommandAttribute("create hangout", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
         private async Task CreateHangout(CommandArgs<HangoutBotConfig> args)
         {
@@ -69,6 +71,8 @@ namespace HangoutBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
+        [Usage("This command removes the specified hangout and all of its associated roles.")]
+        [Argument("Hangout Name", "The name of the hangout channel to remove.")]
         [CommandAttribute("remove hangout", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<name>[a-zA-Z0-9\\s]+)\"")]
         private async Task RemoveHangout(CommandArgs<HangoutBotConfig> args)
         {
@@ -96,6 +100,8 @@ namespace HangoutBot
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
+        [Usage("This command sets the category that hangout channels will be organized under. Existing hangouts will be pulled into this category on use.")]
+        [Argument("Channel", "Mention the category you would like to designate as the hangout category.")]
         [CommandAttribute("set hangout category", CommandLevel = CommandLevel.Admin, ParameterRegex = "<#(?<channelID>\\d+)>")]
         private async Task SetHangoutCategory(CommandArgs<HangoutBotConfig> args)
         {

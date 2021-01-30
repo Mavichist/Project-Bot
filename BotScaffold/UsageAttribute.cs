@@ -6,7 +6,7 @@ namespace BotScaffold
     /// An attribute ascribing help information to a command method.
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-    sealed class UsageAttribute : Attribute
+    public sealed class UsageAttribute : Attribute
     {
         private readonly string usageInfo;
 

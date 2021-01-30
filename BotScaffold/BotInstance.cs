@@ -443,7 +443,20 @@ namespace BotScaffold
             protected async Task SetHelpChannel(CommandArgs<TConfig> args)
             {
                 args.Config.HelpChannelID = args.Channel.Id;
-                await args.Channel.SendMessageAsync($"[{Name}] I will now only allow help commands in this channel.");
+                await args.Channel.SendMessageAsync($"**[{Name}]** I will now only allow help commands in this channel.");
+            }
+            /// <summary>
+            /// A command for setting the indicator on a bot.
+            /// Currently sets the indicator for every bot running on the instance.
+            /// </summary>
+            /// <param name="args">The context for the message invoking the command.</param>
+            /// <returns>An awaitable task for the command.</returns>
+            [Usage("Using this command will set the currently active bot indicator character.")]
+            [Command("set indicator", CommandLevel = CommandLevel.Admin, ParameterRegex = "(?<indicator>[\\W\\S\\D])")]
+            protected async Task SetIndicator(CommandArgs<TConfig> args)
+            {
+                args.Config.Indicator = args["indicator"][0];
+                await args.Channel.SendMessageAsync($"**[{Name}]** I will now only respond to commands starting with **{args.Config.Indicator}**");
             }
 
             /// <summary>

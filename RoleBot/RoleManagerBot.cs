@@ -41,6 +41,9 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command registers an emoji with a specified role. When a user reacts to my designated role-assignment post with the emoji, they will receive the appropriate role.")]
+        [Argument("Emoji Name", "This is the name of the emoji. It should include the surrounding colons. Typing an emoji, then wrapping it in ` characters works for this.")]
+        [Argument("Role", "Mention a role to associate with the emoji. Users will be able to self-assign this emoji.")]
         [CommandAttribute("register emoji", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d-_]+:)`\\s+<@&(?<roleID>\\d+)>")]
         private async Task Register(CommandArgs<RoleBotConfig> args)
         {
@@ -74,6 +77,8 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command deregisters an emoji and its counterpart role. Users will no longer be able to self-assign this role using this emoji.")]
+        [Argument("Emoji Name", "This is the name of the emoji. It should include the surrounding colons. Typing an emoji, then wrapping it in ` characters works for this.")]
         [CommandAttribute("deregister emoji", CommandLevel = CommandLevel.Admin, ParameterRegex = "`(?<emojiName>:[\\w\\d-_]+:)`")]
         private async Task Deregister(CommandArgs<RoleBotConfig> args)
         {
@@ -95,6 +100,7 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("Creates a reaction post in the current channel that the bot will watch for reactions and assign roles with.")]
         [CommandAttribute("create reaction post", CommandLevel = CommandLevel.Admin)]
         private async Task CreateRolePost(CommandArgs<RoleBotConfig> args)
         {
@@ -112,6 +118,7 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("Updates the role reaction post to reflect recent changes to emoji/role mappings.")]
         [CommandAttribute("update reaction post", CommandLevel = CommandLevel.Admin)]
         private async Task UpdateRolePost(CommandArgs<RoleBotConfig> args)
         {
@@ -136,6 +143,9 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("Creates a role that the bot will automatically keep track of.")]
+        [Argument("Role Name", "This is the name of the role you are creating.")]
+        [Argument("Color", "This is the color of the role you are creating, formatted as 'color(R,G,B).'")]
         [CommandAttribute("create managed role", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<roleName>[\\w\\d_\\-\\s]+)\"\\s+color\\((?<red>\\d+),(?<green>\\d+),(?<blue>\\d+)\\)")]
         private async Task CreateManagedRole(CommandArgs<RoleBotConfig> args)
         {
@@ -161,6 +171,8 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command removes a managed role, including removing its registered emojis.")]
+        [Argument("Role", "Mention the role you would like to remove from the managed list.")]
         [CommandAttribute("remove managed role", CommandLevel = CommandLevel.Admin, ParameterRegex = "<@&(?<roleID>\\d+)>")]
         private async Task RemoveManagedRole(CommandArgs<RoleBotConfig> args)
         {
@@ -200,6 +212,8 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command designates a role as a managed one. Use this for existing roles you would like to add to the managed system.")]
+        [Argument("Role", "Mention the role you would like to add to the management system.")]
         [CommandAttribute("manage role", CommandLevel = CommandLevel.Admin, ParameterRegex = "<@&(?<roleID>\\d+)>")]
         private async Task ManageRole(CommandArgs<RoleBotConfig> args)
         {
@@ -227,6 +241,7 @@ namespace RoleBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command lists all roles on the server that are not managed by this bot.")]
         [CommandAttribute("list unmanaged roles", CommandLevel = CommandLevel.Admin)]
         private async Task ListUnmanagedRoles(CommandArgs<RoleBotConfig> args)
         {

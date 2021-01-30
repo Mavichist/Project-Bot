@@ -31,6 +31,7 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command shows the user's stash, which contains a record of emoji reactions they have been given by other users.")]
         [CommandAttribute("show stash", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowStash(CommandArgs<RPGBotConfig> args)
         {
@@ -58,6 +59,7 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command shows the inventory of the calling user.")]
         [CommandAttribute("show inventory", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowInventory(CommandArgs<RPGBotConfig> args)
         {
@@ -89,6 +91,7 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command shows the resources and statistics (health, mana, stamina, etc.) of the calling user.")]
         [CommandAttribute("show stats", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowMe(CommandArgs<RPGBotConfig> args)
         {
@@ -122,6 +125,7 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This command toggles the active channel as a PvP channel. This is to reduce spam in channels where you don't want people PvPing.")]
         [CommandAttribute("toggle pvp channel", CommandLevel = CommandLevel.Admin)]
         protected async Task TogglePVPChannel(CommandArgs<RPGBotConfig> args)
         {
@@ -145,6 +149,8 @@ namespace RPGBot
         /// </summary>
         /// <param name="args">The command arguments.</param>
         /// <returns>A task for completing the command.</returns>
+        [Usage("This is an admin-only command for creating items and adding them to the RPG item pool.")]
+        [Argument("Item Json", "The Json for the item in question. This information is parsed and values are extracted and added to the item's data structure.")]
         [CommandAttribute("forge item", CommandLevel = CommandLevel.Admin, ParameterRegex = "```(?<json>[\\w\\W\\n]*)```")]
         protected async Task ForgeItem(CommandArgs<RPGBotConfig> args)
         {

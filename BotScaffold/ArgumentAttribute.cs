@@ -4,7 +4,7 @@ namespace BotScaffold
     /// An attribute for describing command arguments.
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
-    sealed class ArgumentAttribute : System.Attribute
+    public sealed class ArgumentAttribute : System.Attribute
     {
         private readonly string name;
         private readonly string info;
