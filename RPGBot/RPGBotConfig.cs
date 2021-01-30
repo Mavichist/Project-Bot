@@ -29,15 +29,6 @@ namespace RPGBot
             private set;
         } = new Dictionary<string, Item>();
         /// <summary>
-        /// Specifies the set of channel IDs of stat-related commands to reduce spam.
-        /// </summary>
-        [JsonInclude]
-        public HashSet<ulong> StatChannels
-        {
-            get;
-            private set;
-        } = new HashSet<ulong>();
-        /// <summary>
         /// A set of channel IDs for pvp-enabled zones.
         /// </summary>
         [JsonInclude]

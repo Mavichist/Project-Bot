@@ -34,7 +34,7 @@ namespace RPGBot
         [CommandAttribute("show stash", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowStash(CommandArgs<RPGBotConfig> args)
         {
-            if (args.Config.StatChannels.Contains(args.Channel.Id))
+            if (args.Config.HelpChannelID == args.Channel.Id)
             {
                 DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
                 Player player = args.Config.GetPlayer(member.Id);
@@ -92,7 +92,7 @@ namespace RPGBot
         [CommandAttribute("show stats", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task ShowMe(CommandArgs<RPGBotConfig> args)
         {
-            if (args.Config.StatChannels.Contains(args.Channel.Id))
+            if (args.Config.HelpChannelID == args.Channel.Id)
             {
                 DiscordMember member = await args.Guild.GetMemberAsync(args.Author.Id);
                 Player player = args.Config.GetPlayer(member.Id);
@@ -115,25 +115,6 @@ namespace RPGBot
                 builder.AddField($"Status: {(player.IsAlive ? "Alive" : "Dead")}", "*For now...*");
 
                 await args.Channel.SendMessageAsync(null, false, builder.Build());
-            }
-        }
-        /// <summary>
-        /// A command for toggling whether a channel can host stat commands.
-        /// </summary>
-        /// <param name="args">The command arguments.</param>
-        /// <returns>A task for completing the command.</returns>
-        [CommandAttribute("toggle stat channel", CommandLevel = CommandLevel.Admin)]
-        protected async Task ToggleStatChannel(CommandArgs<RPGBotConfig> args)
-        {
-            if (args.Config.StatChannels.Contains(args.Channel.Id))
-            {
-                args.Config.StatChannels.Remove(args.Channel.Id);
-                await args.Channel.SendMessageAsync("This channel is no longer a stats channel!");
-            }
-            else
-            {
-                args.Config.StatChannels.Add(args.Channel.Id);
-                await args.Channel.SendMessageAsync("This channel is now a stats channel!");
             }
         }
         /// <summary>

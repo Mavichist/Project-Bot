@@ -16,7 +16,17 @@ namespace BotScaffold
         public char Indicator
         {
             get;
-            private set;
+            set;
+        }
+        /// <summary>
+        /// The designated channel for using help commands.
+        /// Intended to reduce spam, help commands generate a lot of text.
+        /// </summary>
+        [JsonInclude]
+        public ulong HelpChannelID
+        {
+            get;
+            set;
         }
 
         /// <summary>

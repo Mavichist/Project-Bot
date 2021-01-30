@@ -394,38 +394,53 @@ namespace BotScaffold
             /// </summary>
             /// <param name="args">The context for the message invoking the command.</param>
             /// <returns>An awaitable task for the command.</returns>
-            [UsageAttribute("Using this command will generate help information for my commands.")]
-            [CommandAttribute("help", CommandLevel = CommandLevel.Unrestricted)]
+            [Usage("Using this command will generate help information for my commands.")]
+            [Command("help", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<botName>\\w+)")]
             protected async Task Help(CommandArgs<TConfig> args)
             {
-                DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-                builder.WithTitle($"Command List for {Name}:");
-
-                foreach (Command<TConfig> command in Commands)
+                if (args.Channel.Id == args.Config.HelpChannelID)
                 {
-                    string fieldName = $"{args.Config.Indicator}{command.CommandString}";
+                    DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+                    builder.WithTitle($"Command List for {Name}:");
 
-                    StringBuilder sb = new StringBuilder();
-
-                    sb.Append($"- **Usage:** *{command.UsageInformation}*\n");
-                    sb.Append($"- **Level:** *{command.CommandLevel}*\n");
-
-                    if (command.ArgumentInfo.Count > 0)
+                    foreach (Command<TConfig> command in Commands)
                     {
-                        sb.Append("- **Arguments:**\n");
-                        foreach (var argumentInfo in command.ArgumentInfo)
+                        string fieldName = $"`{args.Config.Indicator}{command.CommandString}`";
+
+                        StringBuilder sb = new StringBuilder();
+
+                        sb.Append($"- **Usage:** *{command.UsageInformation}*\n");
+                        sb.Append($"- **Level:** *{command.CommandLevel}*\n");
+
+                        if (command.ArgumentInfo.Count > 0)
                         {
-                            sb.Append($"- + **{argumentInfo.Name}**: *{argumentInfo.Info}*\n");
+                            sb.Append("- **Arguments:**\n");
+                            foreach (var argumentInfo in command.ArgumentInfo)
+                            {
+                                sb.Append($"- + **{argumentInfo.Name}**: *{argumentInfo.Info}*\n");
+                            }
                         }
-                    }
-                    else
-                    {
-                        sb.Append("- **Takes no arguments**\n");
-                    }
+                        else
+                        {
+                            sb.Append("- **Takes no arguments**\n");
+                        }
 
-                    builder.AddField(fieldName, sb.ToString());
+                        builder.AddField(fieldName, sb.ToString());
+                    }
+                    await args.Channel.SendMessageAsync(null, false, builder.Build());
                 }
-                await args.Channel.SendMessageAsync(null, false, builder.Build());
+            }
+            /// <summary>
+            /// A command for setting the designated help channel for a bot.
+            /// </summary>
+            /// <param name="args">The context for the message invoking the command.</param>
+            /// <returns>An awaitable task for the command.</returns>
+            [Usage("Using this command will set the current channel as the designated help channel, for using help commands in.")]
+            [Command("set help channel", CommandLevel = CommandLevel.Admin)]
+            protected async Task SetHelpChannel(CommandArgs<TConfig> args)
+            {
+                args.Config.HelpChannelID = args.Channel.Id;
+                await args.Channel.SendMessageAsync($"[{Name}] I will now only allow help commands in this channel.");
             }
 
             /// <summary>
