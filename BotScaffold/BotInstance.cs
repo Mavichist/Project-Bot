@@ -452,7 +452,7 @@ namespace BotScaffold
             /// <param name="args">The context for the message invoking the command.</param>
             /// <returns>An awaitable task for the command.</returns>
             [Usage("Using this command will set the currently active bot indicator character.")]
-            [Command("set indicator", CommandLevel = CommandLevel.Admin, ParameterRegex = "(?<indicator>[\\W\\S\\D])")]
+            [Command("set indicator", CommandLevel = CommandLevel.Admin, ParameterRegex = "\"(?<indicator>[\\W\\S\\D])\"")]
             protected async Task SetIndicator(CommandArgs<TConfig> args)
             {
                 args.Config.Indicator = args["indicator"][0];
