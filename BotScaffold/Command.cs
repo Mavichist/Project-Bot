@@ -49,29 +49,21 @@ namespace BotScaffold
             private set;
         }
         /// <summary>
-        /// Describes the help and usage information for this command.
+        /// Contains usage help information for users.
         /// </summary>
-        public CommandHelp Help
+        public string UsageInformation
         {
             get;
             private set;
         }
-
         /// <summary>
-        /// Creates a new command object by mapping a command string to a callback handler.
+        /// Contains information on each argument the command takes.
         /// </summary>
-        /// <param name="commandString">The string that identifies the command.</param>
-        /// <param name="parameterRegex">A regular expression for extracting parameter values.</param>
-        /// <param name="callback">The callback that handles the command execution.</param>
-        /// <param name="help">The help information for the user to read.</param>
-        public Command(string commandString, string parameterRegex, CommandCallback<TConfig> callback, CommandLevel commandLevel, CommandHelp help)
+        public List<string> ArgumentInformation
         {
-            CommandString = commandString;
-            ParameterRegex = parameterRegex;
-            Callback = callback;
-            CommandLevel = commandLevel;
-            Help = help;
-        }
+            get;
+            private set;
+        } = new List<string>();
 
         /// <summary>
         /// Attempts to invoke this command given the current user string.
@@ -154,11 +146,25 @@ namespace BotScaffold
             foreach (MethodInfo m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 CommandAttribute attr = m.GetCustomAttribute<CommandAttribute>();
-                HelpAttribute help = m.GetCustomAttribute<HelpAttribute>();
-
+                UsageAttribute usage = m.GetCustomAttribute<UsageAttribute>();
                 CommandCallback<TConfig> callback = m.CreateDelegate<CommandCallback<TConfig>>(o);
 
-                commands.Add(new Command<TConfig>(attr.CommandString, attr.ParameterRegex, callback, attr.CommandLevel, help?.CreateHelp()));
+                Command<TConfig> command = new Command<TConfig>()
+                {
+                    CommandString = attr.CommandString,
+                    ParameterRegex = attr.ParameterRegex,
+                    Callback = callback,
+                    CommandLevel = attr.CommandLevel,
+                    UsageInformation = usage.UsageInfo ?? "No information available."
+                };
+
+                foreach (var argument in m.GetCustomAttributes<ArgumentAttribute>())
+                {
+                    command.ArgumentInformation.Add($"{argument.Name}: {argument.Info}");
+                }
+
+                commands.Add(command);
+
                 Console.WriteLine($"Added \"{attr.CommandString}\" to {o}.");
             }
 

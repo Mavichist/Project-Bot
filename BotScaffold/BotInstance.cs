@@ -394,6 +394,7 @@ namespace BotScaffold
             /// </summary>
             /// <param name="args">The context for the message invoking the command.</param>
             /// <returns>An awaitable task for the command.</returns>
+            [UsageAttribute("Using this command will generate help information for every bot currently running.")]
             [CommandAttribute("help", CommandLevel = CommandLevel.Unrestricted)]
             protected async Task Help(CommandArgs<TConfig> args)
             {
@@ -402,29 +403,26 @@ namespace BotScaffold
 
                 foreach (Command<TConfig> command in Commands)
                 {
-                    string fieldName = $"`{args.Config.Indicator}{command.CommandString}`";
+                    string fieldName = $"{args.Config.Indicator}{command.CommandString}";
 
-                    if (command.Help != null)
+                    StringBuilder sb = new StringBuilder();
+
+                    sb.Append($"Usage information: *{command.UsageInformation}*\n");
+
+                    if (command.ArgumentInformation.Count > 0)
                     {
-                        StringBuilder sb = new StringBuilder();
-
-                        sb.Append($"Usage information: *{command.Help.UsageInfo}*");
-
-                        if (command.Help.Arguments != null && command.Help.Arguments.Length > 0)
+                        sb.Append("Arguments:\n");
+                        foreach (string argumentInfo in command.ArgumentInformation)
                         {
-                            sb.Append("Arguments:\n");
-                            for (int i = 0; i < command.Help.Arguments.Length; i++)
-                            {
-                                sb.Append(command.Help.Arguments[i]);
-                            }
+                            sb.Append($"{argumentInfo}\n");
                         }
-
-                        builder.AddField(fieldName, sb.ToString());
                     }
                     else
                     {
-                        builder.AddField(fieldName, "*No help available.*");
+                        sb.Append("*Takes no arguments*\n");
                     }
+
+                    builder.AddField(fieldName, sb.ToString());
                 }
                 await args.Channel.SendMessageAsync(null, false, builder.Build());
             }
