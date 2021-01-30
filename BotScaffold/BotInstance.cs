@@ -400,7 +400,7 @@ namespace BotScaffold
                 builder.WithTitle($"Command List for {Name}:");
                 foreach (Command<TConfig> command in Commands)
                 {
-                    builder.AddField($"`{args.Config.Indicator}{command.CommandString}`", $"```{command.ParameterRegex}```");
+                    builder.AddField($"`{args.Config.Indicator}{command.CommandString}`", $"```{command.CommandLevel}: {command.ParameterRegex}```");
                 }
                 await args.Channel.SendMessageAsync(null, false, builder.Build());
             }
