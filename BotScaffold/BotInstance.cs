@@ -257,10 +257,6 @@ namespace BotScaffold
                             {
                                 break;
                             }
-                            else if (state == CommandState.ParameterError)
-                            {
-                                await args.Channel.SendMessageAsync($"Incorrectly formatted parameters. Should match ```{c.ParameterRegex}```");
-                            }
                         }
                     }
                 }

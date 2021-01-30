@@ -121,7 +121,7 @@ namespace BotScaffold
         /// <returns>An integer denoting the comparison.</returns>
         public int CompareTo(Command<TConfig> other)
         {
-            int comp = CommandString.Length - other.CommandString.Length;
+            int comp = other.CommandString.Length - CommandString.Length;
             if (comp == 0)
             {
                 comp -= ParameterRegex is null ? 0 : 1;
