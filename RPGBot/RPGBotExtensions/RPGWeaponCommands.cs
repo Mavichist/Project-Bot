@@ -79,7 +79,7 @@ namespace RPGBot
         /// <returns>A task for completing the command.</returns>
         [Usage("This command allows you to attack another player with your currently equipped weapon. You can only attack users within your weapon's range.")]
         [Argument("User", "Mention the user you would like to attack.")]
-        [CommandAttribute("attack", CommandLevel = CommandLevel.Unrestricted)]
+        [Command("attack", CommandLevel = CommandLevel.Unrestricted)]
         protected async Task Attack(CommandArgs<RPGBotConfig> args)
         {
             if (args.Config.PVPChannels.Contains(args.Channel.Id))
@@ -143,7 +143,7 @@ namespace RPGBot
         /// <returns>A task for completing the command.</returns>
         [Usage("This command equips a weapon from the calling player's inventory.")]
         [Argument("Index", "This is the index in your inventory indicating the slot you'd like to equip your weapon from. If no weapon exists in this slot, the default weapon will be used instead.")]
-        [CommandAttribute("equip weapon", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<index>\\d+)")]
+        [Command("equip weapon", CommandLevel = CommandLevel.Unrestricted, ParameterRegex = "(?<index>\\d+)")]
         protected async Task EquipWeapon(CommandArgs<RPGBotConfig> args)
         {
             int index = int.Parse(args["index"]);

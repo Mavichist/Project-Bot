@@ -32,7 +32,7 @@ namespace BotScaffold
         /// <param name="args">The context for the message invoking the command.</param>
         /// <returns>An awaitable task for the command.</returns>
         [Usage("Using this command will shut down the bot on a server level. It is for debugging only.")]
-        [CommandAttribute("shutdown", CommandLevel = CommandLevel.Owner)]
+        [Command("shutdown", CommandLevel = CommandLevel.Owner)]
         protected async Task Shutdown(CommandArgs<BotConfig> args)
         {
             await args.Channel.SendMessageAsync("Shutting down...");
