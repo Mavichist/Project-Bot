@@ -48,6 +48,14 @@ namespace BotScaffold
             get;
             private set;
         }
+        /// <summary>
+        /// Describes the help and usage information for this command.
+        /// </summary>
+        public CommandHelp Help
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Creates a new command object by mapping a command string to a callback handler.
@@ -55,12 +63,14 @@ namespace BotScaffold
         /// <param name="commandString">The string that identifies the command.</param>
         /// <param name="parameterRegex">A regular expression for extracting parameter values.</param>
         /// <param name="callback">The callback that handles the command execution.</param>
-        public Command(string commandString, string parameterRegex, CommandCallback<TConfig> callback, CommandLevel commandLevel)
+        /// <param name="help">The help information for the user to read.</param>
+        public Command(string commandString, string parameterRegex, CommandCallback<TConfig> callback, CommandLevel commandLevel, CommandHelp help)
         {
             CommandString = commandString;
             ParameterRegex = parameterRegex;
             Callback = callback;
             CommandLevel = commandLevel;
+            Help = help;
         }
 
         /// <summary>
@@ -127,7 +137,7 @@ namespace BotScaffold
             }
             return comp;
         }
-    
+
         /// <summary>
         /// Generates a list of command objects based on the command attributes for a given object.
         /// </summary>
@@ -135,7 +145,7 @@ namespace BotScaffold
         /// generate commands from.</param>
         /// <returns>A list of commands, sorted in order of least significant command string to most
         /// significant command string.</returns>
-        public static List<Command<TConfig>> GetCommands<TConfig>(object o) where TConfig : BotConfig
+        public static List<Command<TConfig>> GetCommands(object o)
         {
             List<Command<TConfig>> commands = new List<Command<TConfig>>();
 
@@ -143,12 +153,13 @@ namespace BotScaffold
 
             foreach (MethodInfo m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                foreach (CommandAttribute attr in m.GetCustomAttributes<CommandAttribute>())
-                {
-                    CommandCallback<TConfig> callback = m.CreateDelegate<CommandCallback<TConfig>>(o);
-                    commands.Add(new Command<TConfig>(attr.CommandString, attr.ParameterRegex, callback, attr.CommandLevel));
-                    Console.WriteLine($"Added \"{attr.CommandString}\" to {o}.");
-                }
+                CommandAttribute attr = m.GetCustomAttribute<CommandAttribute>();
+                HelpAttribute help = m.GetCustomAttribute<HelpAttribute>();
+
+                CommandCallback<TConfig> callback = m.CreateDelegate<CommandCallback<TConfig>>(o);
+
+                commands.Add(new Command<TConfig>(attr.CommandString, attr.ParameterRegex, callback, attr.CommandLevel, help?.CreateHelp()));
+                Console.WriteLine($"Added \"{attr.CommandString}\" to {o}.");
             }
 
             commands.Sort();

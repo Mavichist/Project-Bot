@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -190,7 +191,7 @@ namespace BotScaffold
             public Bot(string name)
             {
                 Name = name;
-                Commands = Command<TConfig>.GetCommands<TConfig>(this);
+                Commands = Command<TConfig>.GetCommands(this);
             }
             
             /// <summary>
@@ -398,9 +399,32 @@ namespace BotScaffold
             {
                 DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
                 builder.WithTitle($"Command List for {Name}:");
+
                 foreach (Command<TConfig> command in Commands)
                 {
-                    builder.AddField($"`{args.Config.Indicator}{command.CommandString}`", $"```{command.CommandLevel}: {command.ParameterRegex}```");
+                    string fieldName = $"`{args.Config.Indicator}{command.CommandString}`";
+
+                    if (command.Help != null)
+                    {
+                        StringBuilder sb = new StringBuilder();
+
+                        sb.Append($"Usage information: *{command.Help.UsageInfo}*");
+
+                        if (command.Help.Arguments != null && command.Help.Arguments.Length > 0)
+                        {
+                            sb.Append("Arguments:\n");
+                            for (int i = 0; i < command.Help.Arguments.Length; i++)
+                            {
+                                sb.Append(command.Help.Arguments[i]);
+                            }
+                        }
+
+                        builder.AddField(fieldName, sb.ToString());
+                    }
+                    else
+                    {
+                        builder.AddField(fieldName, "*No help available.*");
+                    }
                 }
                 await args.Channel.SendMessageAsync(null, false, builder.Build());
             }
