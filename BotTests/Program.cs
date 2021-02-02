@@ -3,6 +3,7 @@ using BotScaffold;
 using HangoutBot;
 using RoleBot;
 using RPGBot;
+using MarkovBot;
 
 namespace BotTests
 {
@@ -26,11 +27,13 @@ namespace BotTests
             HangoutManagerBot hangoutBot = new HangoutManagerBot("HangoutBot");
             RoleManagerBot roleBot = new RoleManagerBot("RoleBot");
             RPGManagerBot rpgBot = new RPGManagerBot("RPGBot");
+            MarkovChainBot markovBot = new MarkovChainBot("MarkovBot");
 
             coreBot.AttachTo(instance);
             hangoutBot.AttachTo(instance);
             roleBot.AttachTo(instance);
             rpgBot.AttachTo(instance);
+            markovBot.AttachTo(instance);
 
             Task.WaitAll(instance.RunAsync());
 
