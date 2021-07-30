@@ -2,7 +2,7 @@
 
 ## About
 
-The project bot and its related scaffolding are designed to handle the creation, deletion and access of private channels for those participating in ComSSA projects. It is not necessarily specific to ComSSA, and has many other applications.
+The project bot and its related scaffolding are designed to handle the creation, deletion and access of private channels for those participating in C.SE projects. It is not necessarily specific to C.SE, and has many other applications.
 
 By adding more projects to this solution, additional bots can be created independent of any others. Multiple bots can be grafted together on startup, meaning that you can run more than one set of commands and functionality through a single client if you want to.
 

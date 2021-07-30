@@ -1,15 +1,12 @@
 ﻿using System.Threading.Tasks;
 using BotScaffold;
-using HangoutBot;
 using RoleBot;
-using RPGBot;
-using MarkovBot;
+using PurgeBot;
 
 namespace BotTests
 {
     /// <summary>
     /// Entrypoint for the program.
-    /// Sample invite link: https://discord.com/oauth2/authorize?client_id=798470738868043786&scope=bot&permissions=268511312
     /// </summary>
     public class Program
     {
@@ -24,16 +21,12 @@ namespace BotTests
             instance.Init();
             
             CoreBot coreBot = new CoreBot("CoreBot");
-            HangoutManagerBot hangoutBot = new HangoutManagerBot("HangoutBot");
             RoleManagerBot roleBot = new RoleManagerBot("RoleBot");
-            RPGManagerBot rpgBot = new RPGManagerBot("RPGBot");
-            MarkovChainBot markovBot = new MarkovChainBot("MarkovBot");
+            MessagePurgeBot purgeBot = new MessagePurgeBot("PurgeBot");
 
             coreBot.AttachTo(instance);
-            hangoutBot.AttachTo(instance);
             roleBot.AttachTo(instance);
-            rpgBot.AttachTo(instance);
-            markovBot.AttachTo(instance);
+            purgeBot.AttachTo(instance);
 
             Task.WaitAll(instance.RunAsync());
 

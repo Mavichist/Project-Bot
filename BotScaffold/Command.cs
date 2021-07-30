@@ -74,7 +74,7 @@ namespace BotScaffold
         /// <returns>A task for handling the command.</returns>
         public async Task<CommandState> AttemptAsync(MessageCreateEventArgs args, TConfig config, BotInstance instance)
         {
-            Match commandMatch = Regex.Match(args.Message.Content, $"^{config.Indicator}{CommandString}(?<parameters>[\\w\\W]*)$");
+            Match commandMatch = Regex.Match(args.Message.Content, $"^{config.Indicator}{CommandString}\\s*(?<parameters>[\\w\\W]*)$");
             if (commandMatch.Success)
             {
                 if (ParameterRegex is null)

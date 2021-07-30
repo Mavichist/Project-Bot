@@ -26,15 +26,6 @@ namespace BotScaffold
             private set;
         }
         /// <summary>
-        /// Contains a set of role IDs that are considered "admins" by the bot.
-        /// </summary>
-        [JsonInclude]
-        public Dictionary<ulong, HashSet<ulong>> ServerAdminRoleIDs
-        {
-            get;
-            set;
-        } = new Dictionary<ulong, HashSet<ulong>>();
-        /// <summary>
         /// Defines the interval, in milliseconds, between automatic saving of config files.
         /// </summary>
         [JsonInclude]
@@ -69,21 +60,6 @@ namespace BotScaffold
             };
             string json = JsonSerializer.Serialize<ClientDetails>(this, options);
             File.WriteAllText(fileName, json);
-        }
-        /// <summary>
-        /// Retrieves a set of server admin roles.
-        /// Creates a new set if none are present.
-        /// </summary>
-        /// <param name="serverID">The server ID for the roles list.</param>
-        /// <returns>A set of role IDs.</returns>
-        public HashSet<ulong> GetAdminRoleIDs(ulong serverID)
-        {
-            if (!ServerAdminRoleIDs.TryGetValue(serverID, out HashSet<ulong> roleIDs))
-            {
-                roleIDs = new HashSet<ulong>();
-                ServerAdminRoleIDs[serverID] = roleIDs;
-            }
-            return roleIDs;
         }
 
         /// <summary>

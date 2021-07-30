@@ -28,6 +28,12 @@ namespace BotScaffold
             get;
             set;
         }
+        [JsonInclude]
+        public HashSet<ulong> AdminRoleIDs
+        {
+            get;
+            set;
+        } = new HashSet<ulong>();
 
         /// <summary>
         /// Constructs an empty bot config object.

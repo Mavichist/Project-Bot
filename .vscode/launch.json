@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/BotTests/bin/Debug/net5.0/publish/BotTests.dll",
+            "program": "${workspaceFolder}/Publish/BotTests.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/BotTests/bin/Debug/net5.0/publish",
+            "cwd": "${workspaceFolder}/Publish",
             "console": "internalConsole",
             "stopAtEntry": false
         },

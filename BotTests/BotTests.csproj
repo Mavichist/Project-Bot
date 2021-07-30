@@ -2,9 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RoleBot\RoleBot.csproj" />
-    <ProjectReference Include="..\HangoutBot\HangoutBot.csproj" />
-    <ProjectReference Include="..\RPGBot\RPGBot.csproj" />
-    <ProjectReference Include="..\MarkovBot\MarkovBot.csproj" />
+    <ProjectReference Include="..\PurgeBot\PurgeBot.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

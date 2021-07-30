@@ -211,13 +211,11 @@ namespace BotScaffold
                 }
                 else
                 {
-                    HashSet<ulong> adminRoleIDs = Instance.Details.GetAdminRoleIDs(guild.Id);
-
                     // We need to find an admin role in the member's role list for them to be considered
                     // an admin.
                     foreach (var role in member.Roles)
                     {
-                        if (adminRoleIDs.Contains(role.Id))
+                        if (ServerConfigs[guild.Id].AdminRoleIDs.Contains(role.Id))
                         {
                             return CommandLevel.Admin;
                         }
@@ -239,23 +237,27 @@ namespace BotScaffold
             /// <returns>A task to handle processing of the command.</returns>
             private async Task OnMessageCreated(DiscordClient client, MessageCreateEventArgs args)
             {
-                TConfig config = GetConfig(args.Guild.Id);
-                
-                // Check to see if the post starts with our indicator and the author wasn't a bot.
-                if (args.Message.Content.StartsWith(config.Indicator) && !args.Author.IsBot)
+                // Only work with guild messages, not private ones.
+                if (args.Guild != null)
                 {
-                    // Get the command level so we can filter out commands this user can't access.
-                    CommandLevel level = await GetCommandLevelAsync(args.Guild, args.Author.Id);
-                    foreach (Command<TConfig> c in Commands)
+                    TConfig config = GetConfig(args.Guild.Id);
+                    
+                    // Check to see if the post starts with our indicator and the author wasn't a bot.
+                    if (!args.Author.IsBot && args.Message.Content.StartsWith(config.Indicator))
                     {
-                        // Only if the command is lower or equal to the user level do we attempt to run it.
-                        if (c.CommandLevel <= level)
+                        // Get the command level so we can filter out commands this user can't access.
+                        CommandLevel level = await GetCommandLevelAsync(args.Guild, args.Author.Id);
+                        foreach (Command<TConfig> c in Commands)
                         {
-                            // If the regex matches and the command succeeds, we can skip the rest.
-                            CommandState state = await c.AttemptAsync(args, config, Instance);
-                            if (state == CommandState.Handled)
+                            // Only if the command is lower or equal to the user level do we attempt to run it.
+                            if (c.CommandLevel <= level)
                             {
-                                break;
+                                // If the regex matches and the command succeeds, we can skip the rest.
+                                CommandState state = await c.AttemptAsync(args, config, Instance);
+                                if (state == CommandState.Handled)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -453,6 +455,51 @@ namespace BotScaffold
             {
                 args.Config.Indicator = args["indicator"][0];
                 await args.Channel.SendMessageAsync($"**[{Name}]** I will now only respond to commands starting with **{args.Config.Indicator}**");
+            }
+            /// <summary>
+            /// Registers a role as an administrator role so it can use administrator commands.
+            /// </summary>
+            /// <param name="args">The context for the message invoking the command.</param>
+            /// <returns>An awaitable task for the command.</returns>
+            [Usage("Registers roles as administrative. Users with administrative roles can use admin-restricted commands.")]
+            [Argument("Roles", "All mentioned roles accompanying this command will be registered as admin.")]
+            [Command("register admin role", CommandLevel = CommandLevel.Owner)]
+            protected async Task RegisterAdminRole(CommandArgs<TConfig> args)
+            {
+                foreach (DiscordRole role in args.MentionedRoles)
+                {
+                    if (!args.Config.AdminRoleIDs.Contains(role.Id))
+                    {
+                        args.Config.AdminRoleIDs.Add(role.Id);
+                        await args.Channel.SendMessageAsync($"The **{role.Name}** role now has administrative privileges.");
+                    }
+                    else
+                    {
+                        await args.Channel.SendMessageAsync($"The **{role.Name}** role already has administrative privileges.");
+                    }
+                }
+            }
+            /// <summary>
+            /// Deregisters a role as an administrator role so it can no longer use admin commands.
+            /// </summary>
+            /// <param name="args">The context for the message invoking the command.</param>
+            /// <returns>An awaitable task for the command.</returns>
+            [Usage("Deregisters roles as administrative. Users without administrative roles cannot use admin-restricted commands.")]
+            [Argument("Roles", "All mentioned roles accompanying this command will be deregistered.")]
+            [Command("deregister admin role", CommandLevel = CommandLevel.Owner)]
+            protected async Task DeregisterAdminRole(CommandArgs<TConfig> args)
+            {
+                foreach (DiscordRole role in args.MentionedRoles)
+                {
+                    if (args.Config.AdminRoleIDs.Remove(role.Id))
+                    {
+                        await args.Channel.SendMessageAsync($"The **{role.Name}** role now has no administrative privileges.");
+                    }
+                    else
+                    {
+                        await args.Channel.SendMessageAsync($"The **{role.Name}** role isn't administrative.");
+                    }
+                }
             }
 
             /// <summary>

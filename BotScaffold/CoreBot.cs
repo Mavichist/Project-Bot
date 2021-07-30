@@ -39,55 +39,6 @@ namespace BotScaffold
             Instance.Stop();
         }
         /// <summary>
-        /// Registers a role as an administrator role so it can use administrator commands.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [Usage("Registers roles as administrative. Users with administrative roles can use admin-restricted commands.")]
-        [Argument("Roles", "All mentioned roles accompanying this command will be registered as admin.")]
-        [Command("register admin role", CommandLevel = CommandLevel.Owner)]
-        protected async Task RegisterAdminRole(CommandArgs<BotConfig> args)
-        {
-            foreach (DiscordRole role in args.MentionedRoles)
-            {
-                HashSet<ulong> adminRoleIDs = Instance.Details.GetAdminRoleIDs(args.Guild.Id);
-
-                if (!adminRoleIDs.Contains(role.Id))
-                {
-                    adminRoleIDs.Add(role.Id);
-                    await args.Channel.SendMessageAsync($"The **{role.Name}** role now has administrative privileges.");
-                }
-                else
-                {
-                    await args.Channel.SendMessageAsync($"The **{role.Name}** role already has administrative privileges.");
-                }
-            }
-        }
-        /// <summary>
-        /// Deregisters a role as an administrator role so it can no longer use admin commands.
-        /// </summary>
-        /// <param name="args">The context for the message invoking the command.</param>
-        /// <returns>An awaitable task for the command.</returns>
-        [Usage("Deregisters roles as administrative. Users without administrative roles cannot use admin-restricted commands.")]
-        [Argument("Roles", "All mentioned roles accompanying this command will be deregistered.")]
-        [Command("deregister admin role", CommandLevel = CommandLevel.Owner)]
-        protected async Task DeregisterAdminRole(CommandArgs<BotConfig> args)
-        {
-            foreach (DiscordRole role in args.MentionedRoles)
-            {
-                HashSet<ulong> adminRoleIDs = Instance.Details.GetAdminRoleIDs(args.Guild.Id);
-
-                if (adminRoleIDs.Remove(role.Id))
-                {
-                    await args.Channel.SendMessageAsync($"The **{role.Name}** role now has no administrative privileges.");
-                }
-                else
-                {
-                    await args.Channel.SendMessageAsync($"The **{role.Name}** role isn't administrative.");
-                }
-            }
-        }
-        /// <summary>
         /// A command for saving all configuration objects immediately.
         /// </summary>
         /// <param name="args">The context for the message invoking the command.</param>
