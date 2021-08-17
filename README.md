@@ -30,7 +30,7 @@ An example of a simple `Echo` bot is shown below:
 ```csharp
 public class EchoBot : BotInstance.Bot<BotConfig>
 {
-    public EchoBot(sing name) : base(name)
+    public EchoBot(string name) : base(name)
     {
         
     }
